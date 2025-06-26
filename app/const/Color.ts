@@ -7,4 +7,8 @@ export const COLORS = {
     danger: '#FF6B6B',
     white: '#FFF',
     black: '#000',
+    blue:'#4299E1',
+    darkGreen:'#10B981',
+    orange:'#F97316',
+    border:'#E5E7EB'
 };

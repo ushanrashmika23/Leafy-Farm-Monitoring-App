@@ -36,10 +36,10 @@ const StatisticsScreen = () => {
     ];
 
     const metrics: Metric[] = [
-        { id: 'temperature', name: 'Temperature', icon: Thermometer, color: '#4299E1', unit: '°C' },
-        { id: 'humidity', name: 'Humidity', icon: Droplet, color: '#F59E0B', unit: '%' },
-        { id: 'moisture', name: 'Soil Moisture', icon: Flower, color: '#10B981', unit: '%' },
-        { id: 'sunlight', name: 'Sunlight', icon: Sun, color: '#F97316', unit: '%' },
+        { id: 'temperature', name: 'Temperature', icon: Thermometer, color: COLORS.blue, unit: '°C' },
+        { id: 'humidity', name: 'Humidity', icon: Droplet, color: COLORS.warning, unit: '%' },
+        { id: 'moisture', name: 'Soil Moisture', icon: Flower, color: COLORS.darkGreen, unit: '%' },
+        { id: 'sunlight', name: 'Sunlight', icon: Sun, color: COLORS.orange, unit: '%' },
     ];
 
     const timePeriods = [
@@ -74,9 +74,9 @@ const StatisticsScreen = () => {
     };
 
     const chartConfig = {
-        backgroundColor: '#ffffff',
-        backgroundGradientFrom: '#ffffff',
-        backgroundGradientTo: '#ffffff',
+        backgroundColor: COLORS.white,
+        backgroundGradientFrom: COLORS.white,
+        backgroundGradientTo: COLORS.white,
         decimalPlaces: 0,
         color: (opacity = 1) => currentMetric?.color || `rgba(0, 0, 0, ${opacity})`,
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
@@ -86,7 +86,7 @@ const StatisticsScreen = () => {
         propsForDots: {
             r: '4',
             strokeWidth: '2',
-            stroke: currentMetric?.color || '#ffa726',
+            stroke: currentMetric?.color || COLORS.warning,
         },
     };
 
@@ -97,7 +97,7 @@ const StatisticsScreen = () => {
             {/* Plant Dropdown */}
             <TouchableOpacity
                 onPress={() => setDropdownOpen(!dropdownOpen)}
-                style={{ backgroundColor: 'white', padding: 16, borderRadius: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: '#E5E7EB' }}
+                style={{ backgroundColor: 'white', padding: 16, borderRadius: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: COLORS.border }}
             >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Text style={{ fontSize: 20, marginRight: 12 }}>🌿</Text>
@@ -109,7 +109,7 @@ const StatisticsScreen = () => {
                 {dropdownOpen ? <ChevronUp size={20} color="gray" /> : <ChevronDown size={20} color="gray" />}
             </TouchableOpacity>
             {dropdownOpen && (
-                <View style={{ backgroundColor: 'white', borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: '#E5E7EB' }}>
+                <View style={{ backgroundColor: 'white', borderRadius: 12, marginBottom: 16, borderWidth: 1, borderColor: COLORS.border }}>
                     {plants.map(plant => (
                         <TouchableOpacity
                             key={plant.id}
@@ -119,7 +119,7 @@ const StatisticsScreen = () => {
                             }}
                             style={{ padding: 12, flexDirection: 'row', alignItems: 'center' }}
                         >
-                            {selectedPlant === plant.id && <Check size={16} color="#62C370" style={{ marginRight: 8 }} />}
+                            {selectedPlant === plant.id && <Check size={16} color={COLORS.primary} style={{ marginRight: 8 }} />}
                             <Text>{plant.name}</Text>
                         </TouchableOpacity>
                     ))}
@@ -134,9 +134,9 @@ const StatisticsScreen = () => {
                         <TouchableOpacity
                             key={period.id}
                             onPress={() => setTimePeriod(period.id)}
-                            style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, backgroundColor: timePeriod === period.id ? '#62C370' : 'transparent' }}
+                            style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, backgroundColor: timePeriod === period.id ? COLORS.primary : 'transparent' }}
                         >
-                            <Text style={{ fontSize: 12, color: timePeriod === period.id ? 'white' : '#4B5563' }}>{period.name}</Text>
+                            <Text style={{ fontSize: 12, color: timePeriod === period.id ? 'white' : COLORS.textSecondary }}>{period.name}</Text>
                         </TouchableOpacity>
                     ))}
                 </View>
@@ -151,10 +151,10 @@ const StatisticsScreen = () => {
                         <TouchableOpacity
                             key={metric.id}
                             onPress={() => setSelectedMetric(metric.id)}
-                            style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: isSelected ? '#62C370' : 'white', borderWidth: 1, borderColor: '#E5E7EB' }}
+                            style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: isSelected ? COLORS.primary : COLORS.white, borderWidth: 1, borderColor: COLORS.border }}
                         >
-                            <IconComp size={16} color={isSelected ? 'white' : '#333'} />
-                            <Text style={{ marginLeft: 6, fontSize: 14, color: isSelected ? 'white' : '#333' }}>{metric.name}</Text>
+                            <IconComp size={16} color={isSelected ? COLORS.white : COLORS.text} />
+                            <Text style={{ marginLeft: 6, fontSize: 14, color: isSelected ? COLORS.white : COLORS.text }}>{metric.name}</Text>
                         </TouchableOpacity>
                     );
                 })}
