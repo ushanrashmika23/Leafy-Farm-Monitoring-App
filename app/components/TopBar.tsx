@@ -1,4 +1,4 @@
-import { Wifi } from 'lucide-react-native';
+import { WifiOff } from 'lucide-react-native';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../const/Color';
@@ -14,13 +14,14 @@ export default function TopBar() {
             <View style={styles.statusContainer}>
                 {/* <View style={styles.dot} /> */}
                 <Text style={styles.statusText}>Disconnected</Text>
-                <Wifi color={COLORS.danger} strokeWidth={2.5}/>
+                <WifiOff color={COLORS.danger} strokeWidth={2.75} />
+                {/* <Text style={styles.statusText}>Disconnected</Text> */}
+                {/* <Wifi color={COLORS.danger} strokeWidth={2.5}/> */}
             </View>
         </View>
     );
 }
 
-{/* <Wifi color="#fff" strokeWidth={2.75} /> */}
 
 const styles = StyleSheet.create({
     container: {
@@ -30,14 +31,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         justifyContent: 'space-between',
         backgroundColor: COLORS.background,
-        // borderBottomWidth: 1,
-        // borderBottomColor: '#E0E0E0',
     },
     avatar: {
         width: 58,
         height: 58,
         borderRadius: 19,
-        backgroundColor: '#CCC',
     },
     center: {
         flex: 1,
@@ -46,11 +44,11 @@ const styles = StyleSheet.create({
     greeting: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
+        color: COLORS.text,
     },
     sub: {
         fontSize: 12,
-        color: '#777',
+        color: COLORS.textSecondary,
     },
     statusContainer: {
         flexDirection: 'row',

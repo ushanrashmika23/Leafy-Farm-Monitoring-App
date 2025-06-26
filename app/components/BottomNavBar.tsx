@@ -63,12 +63,12 @@ const styles = StyleSheet.create({
     },
     navbar: {
         flexDirection: 'row',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: COLORS.white,
         borderRadius: 100,
         paddingVertical: 30,
         width: Dimensions.get('window').width * 0.9,
         justifyContent: 'space-around',
-        shadowColor: '#000',
+        shadowColor: COLORS.black,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.1,
         shadowRadius: 6,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     },
     label: {
         fontSize: 14,
-        color: '#222',
+        color: COLORS.text,
         marginTop: 4,
     },
     activeTab: {
