@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useNavigation } from '@react-navigation/native';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { router } from 'expo-router';
 import { Camera, Droplet, Flower, Sun, Thermometer } from 'lucide-react-native';
 import PlantCard from './components/PlantCard';
 import StatusCard from './components/StatusCard';
@@ -64,7 +65,7 @@ const HomeScreen: React.FC = () => {
 
                 <TouchableOpacity
                     style={styles.cameraAnalysisButton}
-                    onPress={() => navigation.navigate('CameraAnalysis')}
+                    onPress={() => router.push('/CameraAnalysis' as any)}
                 >
                     <Camera color="white" size={24} />
                     <Text style={styles.cameraAnalysisButtonText}>Live Camera Analysis</Text>
