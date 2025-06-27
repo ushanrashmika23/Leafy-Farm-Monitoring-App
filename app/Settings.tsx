@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import {
     Bell,
     ChevronRight,
@@ -13,7 +13,7 @@ import {
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from './const/Color';
-{/* <Router color="#fff" strokeWidth={2.75} /> */ }
+
 type Plant = {
     id: number;
     name: string;
@@ -28,7 +28,7 @@ type SettingItem = {
 };
 
 const SettingsScreen: React.FC = () => {
-    const navigation = useNavigation<any>();
+    const router = useRouter();
 
     const plants: Plant[] = [
         {
@@ -57,7 +57,7 @@ const SettingsScreen: React.FC = () => {
         { icon: User, label: 'Edit User Data', color: '#4299E1', screen: 'EditUser' },
         { icon: Bell, label: 'Notifications', color: '#F59E0B', screen: 'NotificationType' },
         { icon: HelpCircle, label: 'Help & Support', color: '#8B5CF6', screen: 'HelpSupport' },
-        { icon: Eraser, label: 'Erase All Data', color: '#EF4444', screen: 'Settings' },
+        { icon: Eraser, label: 'Erase All Data', color: '#EF4444', screen: 'EraseAllData' },
     ];
 
     return (
@@ -66,7 +66,7 @@ const SettingsScreen: React.FC = () => {
 
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Account</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('EditUser')}>
+                <TouchableOpacity onPress={() => router.push('/EditUser' as any)}>
                     <View style={styles.accountCard}>
                         <View style={styles.avatarContainer}>
                             <Image
@@ -93,7 +93,7 @@ const SettingsScreen: React.FC = () => {
                         return (
                             <TouchableOpacity
                                 key={index}
-                                onPress={() => navigation.navigate(item.screen)}
+                                onPress={() => router.push(`/${item.screen}` as any)}
                                 style={styles.optionItem}
                             >
                                 <View style={[styles.optionIconContainer, { backgroundColor: `${item.color}20` }]}>
@@ -113,7 +113,24 @@ const SettingsScreen: React.FC = () => {
                     {plants.map((plant) => (
                         <TouchableOpacity
                             key={plant.id}
-                            onPress={() => navigation.navigate('EditPlant', { id: plant.id })}
+                            onPress={() => {
+                                router.push({
+                                    pathname: '/EditPlant',
+                                    params: {
+                                        id: plant.id.toString(),
+                                        name: plant.name,
+                                        image: plant.image,
+                                        tempMin: '20',
+                                        tempMax: '30',
+                                        humidityMin: '50',
+                                        humidityMax: '70',
+                                        lightMin: '60',
+                                        lightMax: '90',
+                                        moistureMin: '40',
+                                        moistureMax: '60',
+                                    },
+                                } as any);
+                            }}
                             style={styles.plantItem}
                         >
                             <View style={styles.plantImageContainer}>
