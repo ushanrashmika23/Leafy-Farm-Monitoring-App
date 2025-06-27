@@ -1,4 +1,4 @@
-import { Slot } from 'expo-router';
+import { Slot, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,16 +7,23 @@ import TopBar from './components/TopBar';
 
 export default function Layout() {
   const insets = useSafeAreaInsets();
+  const hideBottomNavScreens = ['/AddPlant', '/EditUser', '/EditPlant'];
+  const segments = useSegments();
+  const currentRoute = '/' + segments.join('/');
 
   return (
     <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <StatusBar style="dark" backgroundColor="#F9F9F9" />
       <View style={styles.container}>
-        <TopBar />
+        {!hideBottomNavScreens.includes(currentRoute) &&
+          <TopBar />
+        }
         <View style={styles.content}>
           <Slot />
         </View>
-        <BottomNav />
+        {!hideBottomNavScreens.includes(currentRoute) &&
+          <BottomNav />
+        }
       </View>
     </SafeAreaView>
   );
@@ -34,10 +41,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingBottom: 90, // leave space for floating navbar
+    paddingBottom: 0, // leave space for floating navbar
   },
 });
-// Place this inside your Layout component's return, preferably at the top level:
-
-// "dark" style sets status bar text/icons to dark (for light backgrounds)
-// "#F9F9F9" matches your app background, or use "black" for a black status bar

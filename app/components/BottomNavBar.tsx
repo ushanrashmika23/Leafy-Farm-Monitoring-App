@@ -69,11 +69,11 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width * 0.9,
         justifyContent: 'space-around',
         shadowColor: COLORS.black,
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 120,
         elevation: 5,
-        marginBottom:16
+        marginBottom: 1,
     },
     tab: {
         alignItems: 'center',
