@@ -13,7 +13,7 @@ import {
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from './const/Color';
-{/* <Router color="#fff" strokeWidth={2.75} /> */}
+{/* <Router color="#fff" strokeWidth={2.75} /> */ }
 type Plant = {
     id: number;
     name: string;
@@ -56,7 +56,7 @@ const SettingsScreen: React.FC = () => {
         { icon: Router, label: 'Connect Lefy', color: '#EC4899', screen: 'ConnectLeafy' },
         { icon: User, label: 'Edit User Data', color: '#4299E1', screen: 'EditUser' },
         { icon: Bell, label: 'Notifications', color: '#F59E0B', screen: 'NotificationType' },
-        { icon: HelpCircle, label: 'Help & Support', color: '#8B5CF6', screen: 'Settings' },
+        { icon: HelpCircle, label: 'Help & Support', color: '#8B5CF6', screen: 'HelpSupport' },
         { icon: Eraser, label: 'Erase All Data', color: '#EF4444', screen: 'Settings' },
     ];
 
@@ -142,12 +142,13 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 16,
         paddingVertical: 8,
-        marginBottom:82,
+        marginBottom: 82,
     },
     headerTitle: {
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 24,
+        marginTop: 16,
     },
     section: {
         marginBottom: 24,
