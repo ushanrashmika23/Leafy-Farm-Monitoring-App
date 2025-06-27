@@ -55,7 +55,7 @@ const SettingsScreen: React.FC = () => {
         { icon: PlusCircle, label: 'Add New Plant', color: '#62C370', screen: 'AddPlant' },
         { icon: Router, label: 'Connect Lefy', color: '#EC4899', screen: 'ConnectLeafy' },
         { icon: User, label: 'Edit User Data', color: '#4299E1', screen: 'EditUser' },
-        { icon: Bell, label: 'Notifications', color: '#F59E0B', screen: 'Settings' },
+        { icon: Bell, label: 'Notifications', color: '#F59E0B', screen: 'NotificationType' },
         { icon: HelpCircle, label: 'Help & Support', color: '#8B5CF6', screen: 'Settings' },
         { icon: Eraser, label: 'Erase All Data', color: '#EF4444', screen: 'Settings' },
     ];

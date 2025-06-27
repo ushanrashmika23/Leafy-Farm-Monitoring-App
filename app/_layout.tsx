@@ -7,7 +7,7 @@ import TopBar from './components/TopBar';
 
 export default function Layout() {
   const insets = useSafeAreaInsets();
-  const hideBottomNavScreens = ['/AddPlant', '/EditUser', '/EditPlant', '/ConnectLeafy', '/Notifications', '/HelpSupport', '/EraseAllData'];
+  const hideBottomNavScreens = ['/AddPlant', '/EditUser', '/EditPlant', '/ConnectLeafy', '/NotificationType', '/HelpSupport', '/EraseAllData'];
   const segments = useSegments();
   const currentRoute = '/' + segments.join('/');
 
