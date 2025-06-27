@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         backgroundColor: COLORS.white,
         borderRadius: 100,
-        paddingVertical: 30,
+        paddingVertical: 22,
         width: Dimensions.get('window').width * 0.9,
         justifyContent: 'space-around',
         shadowColor: COLORS.black,
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 6,
         elevation: 5,
+        marginBottom:16
     },
     tab: {
         alignItems: 'center',

@@ -1,4 +1,5 @@
 import { Slot } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomNav from './components/BottomNavBar';
@@ -9,6 +10,7 @@ export default function Layout() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+      <StatusBar style="dark" backgroundColor="#F9F9F9" />
       <View style={styles.container}>
         <TopBar />
         <View style={styles.content}>
@@ -35,3 +37,7 @@ const styles = StyleSheet.create({
     paddingBottom: 90, // leave space for floating navbar
   },
 });
+// Place this inside your Layout component's return, preferably at the top level:
+
+// "dark" style sets status bar text/icons to dark (for light backgrounds)
+// "#F9F9F9" matches your app background, or use "black" for a black status bar

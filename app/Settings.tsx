@@ -12,6 +12,7 @@ import {
 } from 'lucide-react-native';
 import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { COLORS } from './const/Color';
 {/* <Router color="#fff" strokeWidth={2.75} /> */}
 type Plant = {
     id: number;
@@ -121,7 +122,7 @@ const SettingsScreen: React.FC = () => {
                             <View style={styles.plantInfo}>
                                 <Text style={styles.plantName}>{plant.name}</Text>
                                 <View style={styles.plantStatus}>
-                                    <Leaf size={14} color="#62C370" />
+                                    <Leaf size={14} color={COLORS.primary} />
                                     <Text style={styles.plantStatusText}>Healthy</Text>
                                 </View>
                             </View>
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 16,
         paddingVertical: 8,
+        // marginBottom:320,
     },
     headerTitle: {
         fontSize: 24,
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 12,
         padding: 16,
-        shadowColor: '#000',
+        shadowColor: COLORS.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
@@ -193,7 +195,7 @@ const styles = StyleSheet.create({
     optionsContainer: {
         backgroundColor: 'white',
         borderRadius: 12,
-        shadowColor: '#000',
+        shadowColor: COLORS.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#F3F4F6',
+        borderBottomColor: COLORS.border,
     },
     optionIconContainer: {
         width: 32,
@@ -225,7 +227,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 12,
         padding: 12,
-        shadowColor: '#000',
+        shadowColor: COLORS.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
@@ -266,7 +268,7 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: '#F3F4F6',
+        backgroundColor: COLORS.background,
         alignItems: 'center',
         justifyContent: 'center',
     },

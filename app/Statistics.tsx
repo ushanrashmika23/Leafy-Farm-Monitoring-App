@@ -38,8 +38,8 @@ const StatisticsScreen = () => {
     const metrics: Metric[] = [
         { id: 'temperature', name: 'Temperature', icon: Thermometer, color: COLORS.blue, unit: '°C' },
         { id: 'humidity', name: 'Humidity', icon: Droplet, color: COLORS.warning, unit: '%' },
-        { id: 'moisture', name: 'Soil Moisture', icon: Flower, color: COLORS.darkGreen, unit: '%' },
         { id: 'sunlight', name: 'Sunlight', icon: Sun, color: COLORS.orange, unit: '%' },
+        { id: 'moisture', name: 'Soil Moisture', icon: Flower, color: COLORS.darkGreen, unit: '%' },
     ];
 
     const timePeriods = [
@@ -161,7 +161,7 @@ const StatisticsScreen = () => {
             </View>
 
             {/* Chart Section */}
-            <View style={{ backgroundColor: COLORS.background, borderRadius: 12, padding: 16, marginBottom: 24, alignItems: 'center', justifyContent: 'center' }}>
+            <View style={{ backgroundColor: COLORS.white, borderRadius: 12, padding: 16, marginBottom: 24, alignItems: 'center', justifyContent: 'center' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, justifyContent: 'flex-start', alignSelf: 'stretch' }}>
                     {currentMetric && (
                         <View style={{ backgroundColor: currentMetric.color + '20', borderRadius: 16, width: 32, height: 32, alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>

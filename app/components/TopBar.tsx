@@ -1,4 +1,4 @@
-import { WifiOff } from 'lucide-react-native';
+import { Wifi } from 'lucide-react-native';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../const/Color';
@@ -13,10 +13,10 @@ export default function TopBar() {
             </View>
             <View style={styles.statusContainer}>
                 {/* <View style={styles.dot} /> */}
-                <Text style={styles.statusText}>Disconnected</Text>
-                <WifiOff color={COLORS.danger} strokeWidth={2.75} />
-                {/* <Text style={styles.statusText}>Disconnected</Text> */}
-                {/* <Wifi color={COLORS.danger} strokeWidth={2.5}/> */}
+                {/* <Text style={styles.statusText}>Disconnected</Text>
+                <WifiOff color={COLORS.danger} strokeWidth={2.75} /> */}
+                <Text style={{...styles.statusText,color:COLORS.primary}}>Connected</Text>
+                <Wifi color={COLORS.primary} strokeWidth={2.5}/>
             </View>
         </View>
     );
