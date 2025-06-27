@@ -53,7 +53,7 @@ const SettingsScreen: React.FC = () => {
 
     const settingsItems: SettingItem[] = [
         { icon: PlusCircle, label: 'Add New Plant', color: '#62C370', screen: 'AddPlant' },
-        { icon: Router, label: 'Connect Lefy', color: '#EC4899', screen: 'Settings' },
+        { icon: Router, label: 'Connect Lefy', color: '#EC4899', screen: 'ConnectLeafy' },
         { icon: User, label: 'Edit User Data', color: '#4299E1', screen: 'EditUser' },
         { icon: Bell, label: 'Notifications', color: '#F59E0B', screen: 'Settings' },
         { icon: HelpCircle, label: 'Help & Support', color: '#8B5CF6', screen: 'Settings' },
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 16,
         paddingVertical: 8,
-        // marginBottom:320,
+        marginBottom:82,
     },
     headerTitle: {
         fontSize: 24,
