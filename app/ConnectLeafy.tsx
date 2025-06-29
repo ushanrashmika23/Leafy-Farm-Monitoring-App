@@ -15,13 +15,13 @@ const mockDevices: Device[] = [
     {
         id: '1',
         name: 'Leafy Sensor 01',
-        image: 'https://cdn-icons-png.flaticon.com/512/8833/8833209.png',
+        image: 'https://static.vecteezy.com/system/resources/thumbnails/017/773/678/small_2x/device-3d-illustration-png.png',
         connected: true,
     },
     {
         id: '2',
         name: 'GreenBox Pro',
-        image: 'https://cdn-icons-png.flaticon.com/512/2840/2840110.png',
+        image: 'https://static.vecteezy.com/system/resources/thumbnails/017/773/678/small_2x/device-3d-illustration-png.png',
         connected: false,
     },
 ];
