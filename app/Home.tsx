@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // import StatusCard from '../components/StatusCard';
 // import PlantCard from '../components/PlantCard';
@@ -11,18 +11,41 @@ import { Camera, Droplet, Flower, Sun, Thermometer } from 'lucide-react-native';
 import PlantCard from './components/PlantCard';
 import StatusCard from './components/StatusCard';
 import { COLORS } from './const/Color';
+import { baseApiUrl } from './utils/Utils';
 
 type RootStackParamList = {
     CameraAnalysis: undefined;
     // Add other routes if needed
 };
+interface Plant {
+    id: number;
+    name: string;
+    image: string;
+    days: number;
+    temperature?: number;
+    light?: number;
+    soilMoisture?: number;
+    humidity?: number;
+}
 
 const HomeScreen: React.FC = () => {
+    // const [allPlants, setAllPlants] = useState<Plant[]>([]);
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
     const handleAddPlant = (): void => {
         console.log('Add new plant');
     };
+
+    useEffect(() => {
+        console.log("Fetching all plants from API...");
+        fetch(`${baseApiUrl}/userplants/all`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched plants:", data);
+            })
+            .catch(error => {
+                console.log("Error fetching plants:", error);
+            });
+    }, []);
 
     return (
         <>
@@ -86,26 +109,7 @@ const HomeScreen: React.FC = () => {
                             image="https://images.unsplash.com/photo-1520412099551-62b6bafeb5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
                             days={3}
                         />
-                        <PlantCard
-                            name="Pink Gerbera"
-                            image="https://images.unsplash.com/photo-1596438459194-f275f413d6ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                            days={7}
-                        />
-                        <PlantCard
-                            name="Pink Gerbera"
-                            image="https://images.unsplash.com/photo-1596438459194-f275f413d6ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                            days={7}
-                        />
-                        <PlantCard
-                            name="Semp"
-                            image="https://images.unsplash.com/photo-1520412099551-62b6bafeb5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                            days={3}
-                        />
-                        <PlantCard
-                            name="Semp"
-                            image="https://images.unsplash.com/photo-1520412099551-62b6bafeb5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                            days={3}
-                        />
+                       
 
                     </View>
                 </View>
@@ -201,3 +205,7 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+function useState<T>(arg0: never[]): [any, any] {
+    throw new Error('Function not implemented.');
+}
+
