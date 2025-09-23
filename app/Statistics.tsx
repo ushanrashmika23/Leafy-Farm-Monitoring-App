@@ -7,10 +7,11 @@ import {
     Sun,
     Thermometer
 } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Dimensions, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { COLORS } from './const/Color';
+import { baseApiUrl } from './utils/Utils';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -22,11 +23,229 @@ interface Metric {
     unit: string;
 }
 
+interface DataRecord {
+    _id: string;
+    temperature: number;
+    humidity: number;
+    sunLight: number;
+    soilMoisture: number;
+    Date: string;
+    Time: string;
+    __v: number;
+}
+
+interface ProcessedData {
+    label: string;
+    temperature: number;
+    humidity: number;
+    sunlight: number;
+    moisture: number;
+}
+
 const StatisticsScreen = () => {
     const [selectedMetric, setSelectedMetric] = useState('temperature');
     const [selectedPlant, setSelectedPlant] = useState('all');
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [timePeriod, setTimePeriod] = useState('weekly');
+    const [chartData, setChartData] = useState<ProcessedData[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // Process raw data based on time period - FRESH IMPLEMENTATION
+    const processDataByTimePeriod = (records: DataRecord[], period: string): ProcessedData[] => {
+        if (!records || records.length === 0) {
+            console.log("No records to process");
+            return [];
+        }
+
+        console.log(`Processing ${records.length} records for ${period} view`);
+
+        // Helper function to parse mm/dd/yyyy date strings
+        const parseDate = (dateString: string): Date => {
+            // Handle mm/dd/yyyy format (e.g., "9/10/2025")
+            const parts = dateString.split('/');
+            if (parts.length === 3) {
+                const month = parseInt(parts[0]) - 1; // Month is 0-indexed in Date constructor
+                const day = parseInt(parts[1]);
+                const year = parseInt(parts[2]);
+                return new Date(year, month, day);
+            }
+            // Fallback to default Date parsing
+            return new Date(dateString);
+        };
+
+        // Sort records by date first
+        const sortedRecords = records.sort((a, b) => {
+            const dateA = parseDate(a.Date).getTime();
+            const dateB = parseDate(b.Date).getTime();
+            return dateA - dateB;
+        });
+
+        const groupedData: { [key: string]: DataRecord[] } = {};
+
+        sortedRecords.forEach((record, index) => {
+            const recordDate = parseDate(record.Date);
+            console.log(`Processing record ${index + 1}: Date=${record.Date}, Parsed=${recordDate.toDateString()}`);
+
+            let groupKey = '';
+
+            // Check if date is valid
+            if (isNaN(recordDate.getTime())) {
+                console.error(`Invalid date found: ${record.Date}`);
+                return; // Skip this record
+            }
+
+            switch (period) {
+                case 'daily':
+                    // Format: "Sep 10"
+                    groupKey = recordDate.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                    break;
+
+                case 'weekly':
+                    // Format: "Week 2 Sep" (week of the month)
+                    const weekOfMonth = Math.ceil(recordDate.getDate() / 7);
+                    const monthName = recordDate.toLocaleDateString('en-US', { month: 'short' });
+                    groupKey = `Week ${weekOfMonth} ${monthName}`;
+                    break;
+
+                case 'monthly':
+                    // Format: "Sep 2025"
+                    groupKey = recordDate.toLocaleDateString('en-US', {
+                        month: 'short',
+                        year: 'numeric'
+                    });
+                    break;
+
+                case 'yearly':
+                    // Format: "2025"
+                    groupKey = recordDate.getFullYear().toString();
+                    break;
+
+                default:
+                    groupKey = recordDate.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                    });
+            }
+
+            console.log(`Group key for record: ${groupKey}`);
+
+            if (!groupedData[groupKey]) {
+                groupedData[groupKey] = [];
+            }
+            groupedData[groupKey].push(record);
+        });
+
+        console.log("Grouped data:", Object.keys(groupedData).map(key => ({
+            key,
+            count: groupedData[key].length
+        })));
+
+        // Convert grouped data to processed format
+        const result: ProcessedData[] = [];
+
+        Object.entries(groupedData).forEach(([label, recordsInGroup]) => {
+            console.log(`Processing group: ${label} with ${recordsInGroup.length} records`);
+
+            // Calculate averages
+            const totalTemp = recordsInGroup.reduce((sum, r) => sum + (r.temperature || 0), 0);
+            const totalHumidity = recordsInGroup.reduce((sum, r) => sum + (r.humidity || 0), 0);
+            const totalSunlight = recordsInGroup.reduce((sum, r) => sum + (r.sunLight || 0), 0);
+            const totalMoisture = recordsInGroup.reduce((sum, r) => sum + (r.soilMoisture || 0), 0);
+
+            const avgTemp = totalTemp / recordsInGroup.length;
+            const avgHumidity = totalHumidity / recordsInGroup.length;
+            const avgSunlight = totalSunlight / recordsInGroup.length;
+            const avgMoisture = totalMoisture / recordsInGroup.length;
+
+            const processedPoint: ProcessedData = {
+                label,
+                temperature: Math.round(isNaN(avgTemp) ? 0 : avgTemp),
+                humidity: Math.round(isNaN(avgHumidity) ? 0 : avgHumidity),
+                sunlight: Math.round(isNaN(avgSunlight) ? 0 : Math.min(avgSunlight / 10, 100)), // Scale down sunlight
+                moisture: Math.round(isNaN(avgMoisture) ? 0 : avgMoisture),
+            };
+
+            console.log(`Processed point:`, processedPoint);
+            result.push(processedPoint);
+        });
+
+        // Sort result by the first date in each group for chronological order
+        const sortedResult = result.sort((a, b) => {
+            const groupA = groupedData[a.label];
+            const groupB = groupedData[b.label];
+            const dateA = parseDate(groupA[0].Date).getTime();
+            const dateB = parseDate(groupB[0].Date).getTime();
+            return dateA - dateB;
+        });
+
+        // Limit to the last 15 data points for better chart readability
+        const limitedResult = sortedResult.slice(-15);
+
+        console.log(`Final result: ${limitedResult.length} data points (limited from ${sortedResult.length})`);
+        return limitedResult;
+    };
+
+    // Fetch data from API - FRESH IMPLEMENTATION
+    const fetchChartData = useCallback(async () => {
+        setLoading(true);
+        console.log(`=== Fetching chart data for ${timePeriod} period ===`);
+
+        try {
+            const response = await fetch(`${baseApiUrl}/datarecods/all`);
+            const apiData = await response.json();
+
+            console.log("API Response:", apiData);
+
+            if (apiData.code === 200 && apiData.data?.recods) {
+                const rawRecords = apiData.data.recods;
+                console.log(`Found ${rawRecords.length} raw records`);
+
+                // Log first few records for debugging
+                rawRecords.slice(0, 3).forEach((record: DataRecord, index: number) => {
+                    console.log(`Sample record ${index + 1}:`, {
+                        date: record.Date,
+                        temp: record.temperature,
+                        humidity: record.humidity,
+                        sunLight: record.sunLight,
+                        moisture: record.soilMoisture
+                    });
+                });
+
+                const processedData = processDataByTimePeriod(rawRecords, timePeriod);
+                console.log(`Setting ${processedData.length} processed data points to chart`);
+                setChartData(processedData);
+            } else {
+                console.log("API response invalid or no records found");
+                setChartData([]);
+            }
+        } catch (error) {
+            console.error('Error fetching chart data:', error);
+            // Fallback to dummy data for testing
+            const dummyData = [
+                { label: 'Sep 8', temperature: 22, humidity: 65, moisture: 40, sunlight: 80 },
+                { label: 'Sep 9', temperature: 23, humidity: 68, moisture: 45, sunlight: 85 },
+                { label: 'Sep 10', temperature: 25, humidity: 62, moisture: 42, sunlight: 90 },
+                { label: 'Sep 11', temperature: 24, humidity: 70, moisture: 38, sunlight: 75 },
+                { label: 'Sep 12', temperature: 26, humidity: 60, moisture: 35, sunlight: 95 },
+            ];
+            console.log("Using dummy data:", dummyData);
+            setChartData(dummyData);
+        }
+        setLoading(false);
+    }, [timePeriod]);
+
+    useEffect(() => {
+        fetchChartData();
+    }, [fetchChartData]);
+
+    useEffect(() => {
+        // Refresh data every 30 seconds
+        const interval = setInterval(fetchChartData, 30000);
+        return () => clearInterval(interval);
+    }, [fetchChartData]);
 
     const plants = [
         { id: 'all', name: 'All Plants' },
@@ -52,21 +271,16 @@ const StatisticsScreen = () => {
     const currentMetric = metrics.find(m => m.id === selectedMetric);
     const currentPlant = plants.find(p => p.id === selectedPlant);
 
-    const chartData = [
-        { temperature: 22, humidity: 65, moisture: 40, sunlight: 80 },
-        { temperature: 23, humidity: 68, moisture: 45, sunlight: 85 },
-        { temperature: 25, humidity: 62, moisture: 42, sunlight: 90 },
-        { temperature: 24, humidity: 70, moisture: 38, sunlight: 75 },
-        { temperature: 26, humidity: 60, moisture: 35, sunlight: 95 },
-        { temperature: 24, humidity: 65, moisture: 40, sunlight: 85 },
-        { temperature: 23, humidity: 68, moisture: 45, sunlight: 80 },
-    ];
-
     const data = {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        labels: chartData.length > 0 ? chartData.map(d => d.label) : ['No Data'],
         datasets: [
             {
-                data: chartData.map(d => d[selectedMetric as keyof typeof d] as number),
+                data: chartData.length > 0
+                    ? chartData.map(d => {
+                        const value = d[selectedMetric as keyof ProcessedData] as number;
+                        return isNaN(value) || !isFinite(value) ? 0 : value;
+                    })
+                    : [0],
                 color: (opacity = 1) => currentMetric?.color || `rgba(0, 0, 0, ${opacity})`,
                 strokeWidth: 2,
             },
@@ -87,6 +301,23 @@ const StatisticsScreen = () => {
             r: '4',
             strokeWidth: '2',
             stroke: currentMetric?.color || COLORS.warning,
+        },
+        // Grid and axis configurations
+        propsForBackgroundLines: {
+            strokeDasharray: "5,5", // dashed grid lines
+            stroke: "#e3e3e3",
+            strokeWidth: 1,
+        },
+        propsForLabels: {
+            fontSize: 10,
+        },
+        propsForVerticalLabels: {
+            fontSize: 10,
+            rotation: 90, // rotate x-axis labels vertically
+        },
+        formatXLabel: (value: string) => {
+            // Truncate long labels for better display
+            return value.length > 8 ? value.substring(0, 8) + '...' : value;
         },
     };
 
@@ -173,15 +404,32 @@ const StatisticsScreen = () => {
                         <Text style={{ fontWeight: '500', fontSize: 16 }}>{currentMetric?.name} Chart ({timePeriods.find(t => t.id === timePeriod)?.name})</Text>
                     </View>
                 </View>
-                <LineChart
-                    data={data}
-                    width={screenWidth - 32}
-                    height={280}
-                    chartConfig={chartConfig}
-                    bezier
-                    style={{ borderRadius: 16, marginLeft: -16, marginRight: -16 }}
-                />
+                
+                {loading ? (
+                    <View style={{ width: screenWidth - 64, height: 280, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8f9fa', borderRadius: 16 }}>
+                        <ActivityIndicator size="large" color={currentMetric?.color || COLORS.primary} />
+                        <Text style={{ marginTop: 12, fontSize: 16, color: 'gray', fontWeight: '500' }}>Loading Chart Data...</Text>
+                        <Text style={{ marginTop: 4, fontSize: 14, color: 'gray' }}>Fetching latest sensor readings</Text>
+                    </View>
+                ) : (
+                    <LineChart
+                        data={data}
+                        width={screenWidth - 64}
+                        height={280}
+                        chartConfig={chartConfig}
+                        bezier
+                        style={{ borderRadius: 16 }}
+                        withDots={true}
+                        withShadow={false}
+                        withInnerLines={true}
+                        withOuterLines={true}
+                        withVerticalLabels={true}
+                        withHorizontalLabels={true}
+                        fromZero={false}
+                    />
+                )}
             </View>
+            <View style={{ height: 120, width: '100%' }}></View>
         </ScrollView>
     );
 };

@@ -1,9 +1,50 @@
-import { Wifi } from 'lucide-react-native';
-import React from 'react';
+import { Wifi, WifiOff } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../const/Color';
+import { baseApiUrl } from '../utils/Utils';
 
 export default function TopBar() {
+    const [isConnected, setIsConnected] = useState(false);
+
+    const checkConnectionStatus = async () => {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+            try {
+                const response = await fetch(`${baseApiUrl}/test`, {
+                    method: 'GET',
+                    signal: controller.signal,
+                });
+
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    setIsConnected(true);
+                } else {
+                    setIsConnected(false);
+                }
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        } catch (error) {
+            console.log('Connection check failed:', error);
+            setIsConnected(false);
+        }
+    };
+
+    useEffect(() => {
+        // Check connection status immediately
+        checkConnectionStatus();
+        
+        // Check connection status every 5 seconds
+        const interval = setInterval(checkConnectionStatus, 5000);
+        
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <View style={styles.container}>
             <Image source={require('./../../assets/avatar.jpeg')} style={styles.avatar} />
@@ -12,11 +53,18 @@ export default function TopBar() {
                 <Text style={styles.sub}>Welcome back to Leafy</Text>
             </View>
             <View style={styles.statusContainer}>
-                {/* <View style={styles.dot} /> */}
-                {/* <Text style={styles.statusText}>Disconnected</Text>
-                <WifiOff color={COLORS.danger} strokeWidth={2.75} /> */}
-                <Text style={{...styles.statusText,color:COLORS.primary}}>Connected</Text>
-                <Wifi color={COLORS.primary} strokeWidth={2.5}/>
+                {/* Show connection status based on isConnected */}
+                {isConnected ? (
+                    <>
+                        <Text style={{ ...styles.statusText, color: COLORS.primary }}>Connected</Text>
+                        <Wifi color={COLORS.primary} strokeWidth={2.5} />
+                    </>
+                ) : (
+                    <>
+                        <Text style={styles.statusText}>Disconnected</Text>
+                        <WifiOff color={COLORS.danger} strokeWidth={2.75} />
+                    </>
+                )}
             </View>
         </View>
     );
