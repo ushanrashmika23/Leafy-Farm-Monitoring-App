@@ -1,3 +1,3 @@
-export const baseApiUrl = "http://sg1.legitstorelk.com:3004";
+export const baseApiUrl = "https://leafy-backend-10qemrool-ushanrashmika23-gmailcoms-projects.vercel.app";
 export const appName = "Leafy";
 export const defaultTimeout =10000;

@@ -50,7 +50,7 @@ const HomeScreen: React.FC = () => {
         try {
             const response = await fetch(`${baseApiUrl}/datarecods/latest`);
             const data = await response.json();
-            
+
             if (data.code === 200 && data.data?.recod) {
                 const record = data.data.recod;
                 setSensorData({
@@ -78,21 +78,21 @@ const HomeScreen: React.FC = () => {
         // Set default ranges from 0th plant if plants are available
         if (plants && plants.length > 0) {
             const defaultPlant = plants[0] as any;
-            
+
             optimalRanges = {
-                temperature: defaultPlant.temperature && defaultPlant.temperature.length >= 2 
+                temperature: defaultPlant.temperature && defaultPlant.temperature.length >= 2
                     ? { min: defaultPlant.temperature[0], max: defaultPlant.temperature[1] }
                     : { min: 20, max: 30 },
-                
-                humidity: defaultPlant.humidity && defaultPlant.humidity.length >= 2 
+
+                humidity: defaultPlant.humidity && defaultPlant.humidity.length >= 2
                     ? { min: defaultPlant.humidity[0], max: defaultPlant.humidity[1] }
                     : { min: 40, max: 70 },
-                
-                sunLight: defaultPlant.sunLight && defaultPlant.sunLight.length >= 2 
+
+                sunLight: defaultPlant.sunLight && defaultPlant.sunLight.length >= 2
                     ? { min: defaultPlant.sunLight[0], max: defaultPlant.sunLight[1] }
                     : { min: 1000, max: 3000 },
-                
-                soilMoisture: defaultPlant.soilMoisture && defaultPlant.soilMoisture.length >= 2 
+
+                soilMoisture: defaultPlant.soilMoisture && defaultPlant.soilMoisture.length >= 2
                     ? { min: defaultPlant.soilMoisture[0], max: defaultPlant.soilMoisture[1] }
                     : { min: 30, max: 70 }
             };
@@ -101,21 +101,21 @@ const HomeScreen: React.FC = () => {
         // If a specific plant is selected, override with its optimal ranges
         if (plants && selectedPlantIndex !== null && plants[selectedPlantIndex]) {
             const selectedPlant = plants[selectedPlantIndex] as any;
-            
+
             optimalRanges = {
-                temperature: selectedPlant.temperature && selectedPlant.temperature.length >= 2 
+                temperature: selectedPlant.temperature && selectedPlant.temperature.length >= 2
                     ? { min: selectedPlant.temperature[0], max: selectedPlant.temperature[1] }
                     : optimalRanges.temperature,
-                
-                humidity: selectedPlant.humidity && selectedPlant.humidity.length >= 2 
+
+                humidity: selectedPlant.humidity && selectedPlant.humidity.length >= 2
                     ? { min: selectedPlant.humidity[0], max: selectedPlant.humidity[1] }
                     : optimalRanges.humidity,
-                
-                sunLight: selectedPlant.sunLight && selectedPlant.sunLight.length >= 2 
+
+                sunLight: selectedPlant.sunLight && selectedPlant.sunLight.length >= 2
                     ? { min: selectedPlant.sunLight[0], max: selectedPlant.sunLight[1] }
                     : optimalRanges.sunLight,
-                
-                soilMoisture: selectedPlant.soilMoisture && selectedPlant.soilMoisture.length >= 2 
+
+                soilMoisture: selectedPlant.soilMoisture && selectedPlant.soilMoisture.length >= 2
                     ? { min: selectedPlant.soilMoisture[0], max: selectedPlant.soilMoisture[1] }
                     : optimalRanges.soilMoisture
             };
@@ -138,7 +138,7 @@ const HomeScreen: React.FC = () => {
         fetch(`${baseApiUrl}/userplants/all`)
             .then(response => response.json())
             .then(data => {
-                console.log("Fetched plants:", data);
+                // console.log("Fetched plants:", data);
                 if (data?.data?.plants) {
                     setPlants(data.data.plants);
                     setSelectedPlantIndex(data.data.plants.length > 0 ? 0 : null);
@@ -154,10 +154,10 @@ const HomeScreen: React.FC = () => {
     useEffect(() => {
         // Initial fetch
         fetchLatestSensorData();
-        
+
         // Set up interval to fetch every 1 second
         const interval = setInterval(fetchLatestSensorData, 1000);
-        
+
         return () => clearInterval(interval);
     }, []);
 
@@ -193,43 +193,43 @@ const HomeScreen: React.FC = () => {
                     </View>
                     <View style={[styles.statusCardsContainer, { flexWrap: 'wrap' }]}>
                         <View style={{ width: '48%', marginBottom: 5 }}>
-                            <StatusCard 
-                                title="Temperature" 
-                                value={sensorData ? `${sensorData.temperature}°C` : "--°C"} 
-                                icon={Thermometer} 
+                            <StatusCard
+                                title="Temperature"
+                                value={sensorData ? `${sensorData.temperature}°C` : "--°C"}
+                                icon={Thermometer}
                                 warning={sensorData ? getStatus(sensorData.temperature, 'temperature').isWarning : false}
                                 danger={sensorData ? getStatus(sensorData.temperature, 'temperature').isDanger : false}
-                                statusText={sensorData ? getStatus(sensorData.temperature, 'temperature').text : "Loading"} 
+                                statusText={sensorData ? getStatus(sensorData.temperature, 'temperature').text : "Loading"}
                             />
                         </View>
                         <View style={{ width: '48%', marginBottom: 5 }}>
-                            <StatusCard 
-                                title="Humidity" 
-                                value={sensorData ? `${sensorData.humidity}%` : "--%"} 
-                                icon={Droplet} 
+                            <StatusCard
+                                title="Humidity"
+                                value={sensorData ? `${sensorData.humidity}%` : "--%"}
+                                icon={Droplet}
                                 warning={sensorData ? getStatus(sensorData.humidity, 'humidity').isWarning : false}
                                 danger={sensorData ? getStatus(sensorData.humidity, 'humidity').isDanger : false}
-                                statusText={sensorData ? getStatus(sensorData.humidity, 'humidity').text : "Loading"} 
+                                statusText={sensorData ? getStatus(sensorData.humidity, 'humidity').text : "Loading"}
                             />
                         </View>
                         <View style={{ width: '48%' }}>
-                            <StatusCard 
-                                title="Soil Moisture" 
-                                value={sensorData ? `${sensorData.soilMoisture}%` : "--%"} 
-                                icon={Flower} 
+                            <StatusCard
+                                title="Soil Moisture"
+                                value={sensorData ? `${sensorData.soilMoisture}%` : "--%"}
+                                icon={Flower}
                                 warning={sensorData ? getStatus(sensorData.soilMoisture, 'soilMoisture').isWarning : false}
                                 danger={sensorData ? getStatus(sensorData.soilMoisture, 'soilMoisture').isDanger : false}
-                                statusText={sensorData ? getStatus(sensorData.soilMoisture, 'soilMoisture').text : "Loading"} 
+                                statusText={sensorData ? getStatus(sensorData.soilMoisture, 'soilMoisture').text : "Loading"}
                             />
                         </View>
                         <View style={{ width: '48%' }}>
-                            <StatusCard 
-                                title="Sunlight" 
-                                value={sensorData ? `${Math.round(sensorData.sunLight / 10)}k lux` : "-- lux"} 
-                                icon={Sun} 
+                            <StatusCard
+                                title="Sunlight"
+                                value={sensorData ? `${Math.round(sensorData.sunLight / 10)}k lux` : "-- lux"}
+                                icon={Sun}
                                 warning={sensorData ? getStatus(sensorData.sunLight, 'sunLight').isWarning : false}
                                 danger={sensorData ? getStatus(sensorData.sunLight, 'sunLight').isDanger : false}
-                                statusText={sensorData ? getStatus(sensorData.sunLight, 'sunLight').text : "Loading"} 
+                                statusText={sensorData ? getStatus(sensorData.sunLight, 'sunLight').text : "Loading"}
                             />
                         </View>
                     </View>
