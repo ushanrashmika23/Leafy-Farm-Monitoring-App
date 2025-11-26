@@ -143,6 +143,85 @@ const CameraAnalysisScreen: React.FC = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // Function to send controller device updates
+    const updateControllerDevices = async (tempValue: number, humidityValue: number, soilMoistureValue: number, sunlightValue: number) => {
+        try {
+            const response = await fetch(`${baseApiUrl}/controldevices/update/69269e322911b6808d150ac0`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    temp: tempValue,
+                    humidity: humidityValue,
+                    soilmoisture: soilMoistureValue,
+                    sunlight: sunlightValue
+                })
+            });
+            
+            const data = await response.json();
+            console.log('Controller devices updated:', data);
+        } catch (error) {
+            console.log('Error updating controller devices:', error);
+        }
+    };
+
+    // Function to get difference value for API
+    const getDifferenceValue = (value: number, type: string): number => {
+        const optimalRanges = {
+            temperature: { min: 20, max: 30 },
+            humidity: { min: 40, max: 70 },
+            sunLight: { min: 1000, max: 3000 },
+            soilMoisture: { min: 30, max: 70 }
+        };
+
+        const range = optimalRanges[type as keyof typeof optimalRanges];
+        if (!range) return 0;
+        
+        if (value < range.min) {
+            return range.min - value; // Positive value for increase needed
+        } else if (value > range.max) {
+            return -(value - range.max); // Negative value for decrease needed
+        } else {
+            return 0; // Within optimal range
+        }
+    };
+
+    // Effect to handle controller updates when resolve mode or switches change
+    useEffect(() => {
+        if (!sensorData) return;
+
+        if (resolveMode) {
+            // Resolve mode ON: send calculated difference values for active controllers
+            const tempValue = temperatureController ? getDifferenceValue(sensorData.temperature, 'temperature') : 0;
+            const humidityValue = humidityController ? getDifferenceValue(sensorData.humidity, 'humidity') : 0;
+            const soilMoistureValue = soilMoistureController ? getDifferenceValue(sensorData.soilMoisture, 'soilMoisture') : 0;
+            const sunlightValue = sunlightController ? getDifferenceValue(sensorData.sunLight, 'sunLight') : 0;
+            
+            updateControllerDevices(tempValue, humidityValue, soilMoistureValue, sunlightValue);
+        } else {
+            // Resolve mode OFF: send all values as 0
+            updateControllerDevices(0, 0, 0, 0);
+        }
+    }, [resolveMode, temperatureController, humidityController, soilMoistureController, sunlightController, sensorData]);
+
+    // Effect to turn off all controllers when resolve mode is disabled
+    useEffect(() => {
+        if (!resolveMode) {
+            // Resolve mode OFF: turn off all controllers
+            setTemperatureController(false);
+            setHumidityController(false);
+            setSoilMoistureController(false);
+            setSunlightController(false);
+        } else {
+            // Resolve mode ON: turn on all controllers
+            setTemperatureController(true);
+            setHumidityController(true);
+            setSoilMoistureController(true);
+            setSunlightController(true);
+        }
+    }, [resolveMode]);
+
     const handleAnalyze = () => {
         setAnalyzing(true);
         setTimeout(() => {
@@ -201,7 +280,10 @@ const CameraAnalysisScreen: React.FC = () => {
                         <Text style={styles.resolveModeText}>Resolve Mode</Text>
                         <Switch
                             value={resolveMode}
-                            onValueChange={setResolveMode}
+                            onValueChange={(value) => {
+                                setResolveMode(value);
+                                // API update will be triggered by useEffect
+                            }}
                             trackColor={{ false: '#E5E5E5', true: '#62C370' }}
                             thumbColor={resolveMode ? '#FFFFFF' : '#FFFFFF'}
                         />
@@ -216,9 +298,13 @@ const CameraAnalysisScreen: React.FC = () => {
                         danger={sensorData ? getStatus(sensorData.temperature, 'temperature').isDanger : false}
                         statusText={sensorData ? getStatus(sensorData.temperature, 'temperature').text : "Loading"}
                         switchValue={temperatureController}
-                        onSwitchToggle={setTemperatureController}
+                        onSwitchToggle={(value) => {
+                            setTemperatureController(value);
+                            // API update will be triggered by useEffect
+                        }}
                         differenceText={sensorData ? getDifferenceFromOptimal(sensorData.temperature, 'temperature') : null}
                         arrowDirection={sensorData ? getArrowDirection(sensorData.temperature, 'temperature') : null}
+                        resolveMode={resolveMode}
                     />
                     <StatusCard
                         title="Humidity"
@@ -228,9 +314,13 @@ const CameraAnalysisScreen: React.FC = () => {
                         danger={sensorData ? getStatus(sensorData.humidity, 'humidity').isDanger : false}
                         statusText={sensorData ? getStatus(sensorData.humidity, 'humidity').text : "Loading"}
                         switchValue={humidityController}
-                        onSwitchToggle={setHumidityController}
+                        onSwitchToggle={(value) => {
+                            setHumidityController(value);
+                            // API update will be triggered by useEffect
+                        }}
                         differenceText={sensorData ? getDifferenceFromOptimal(sensorData.humidity, 'humidity') : null}
                         arrowDirection={sensorData ? getArrowDirection(sensorData.humidity, 'humidity') : null}
+                        resolveMode={resolveMode}
                     />
                     <StatusCard
                         title="Soil Moisture"
@@ -240,9 +330,13 @@ const CameraAnalysisScreen: React.FC = () => {
                         danger={sensorData ? getStatus(sensorData.soilMoisture, 'soilMoisture').isDanger : false}
                         statusText={sensorData ? getStatus(sensorData.soilMoisture, 'soilMoisture').text : "Loading"}
                         switchValue={soilMoistureController}
-                        onSwitchToggle={setSoilMoistureController}
+                        onSwitchToggle={(value) => {
+                            setSoilMoistureController(value);
+                            // API update will be triggered by useEffect
+                        }}
                         differenceText={sensorData ? getDifferenceFromOptimal(sensorData.soilMoisture, 'soilMoisture') : null}
                         arrowDirection={sensorData ? getArrowDirection(sensorData.soilMoisture, 'soilMoisture') : null}
+                        resolveMode={resolveMode}
                     />
                     <StatusCard
                         title="Sunlight"
@@ -252,9 +346,13 @@ const CameraAnalysisScreen: React.FC = () => {
                         danger={sensorData ? getStatus(sensorData.sunLight, 'sunLight').isDanger : false}
                         statusText={sensorData ? getStatus(sensorData.sunLight, 'sunLight').text : "Loading"}
                         switchValue={sunlightController}
-                        onSwitchToggle={setSunlightController}
+                        onSwitchToggle={(value) => {
+                            setSunlightController(value);
+                            // API update will be triggered by useEffect
+                        }}
                         differenceText={sensorData ? getDifferenceFromOptimal(sensorData.sunLight, 'sunLight') : null}
                         arrowDirection={sensorData ? getArrowDirection(sensorData.sunLight, 'sunLight') : null}
+                        resolveMode={resolveMode}
                     />
                 </View>
             </View>

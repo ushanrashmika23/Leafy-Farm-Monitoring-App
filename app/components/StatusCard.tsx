@@ -15,6 +15,7 @@ interface StatusCardProps {
     onSwitchToggle?: (value: boolean) => void;
     differenceText?: string | null;
     arrowDirection?: 'up' | 'down' | null;
+    resolveMode?: boolean;
 }
 
 const StatusCard: React.FC<StatusCardProps> = ({
@@ -28,6 +29,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
     onSwitchToggle,
     differenceText,
     arrowDirection,
+    resolveMode = true,
 }) => {
     const chevron1Anim = useRef(new Animated.Value(0)).current;
     const chevron2Anim = useRef(new Animated.Value(0)).current;
@@ -97,8 +99,8 @@ const StatusCard: React.FC<StatusCardProps> = ({
     };
 
     const getBgStyle = () => {
-        // Return muted background if switch is off
-        if (onSwitchToggle && !switchValue) {
+        // Return muted background if switch is off or resolve mode is off
+        if (onSwitchToggle && (!switchValue || !resolveMode)) {
             return styles.mutedBg;
         }
         
@@ -108,8 +110,8 @@ const StatusCard: React.FC<StatusCardProps> = ({
     };
 
     const getIconColor = () => {
-        // Return muted color if switch is off
-        if (onSwitchToggle && !switchValue) {
+        // Return muted color if switch is off or resolve mode is off
+        if (onSwitchToggle && (!switchValue || !resolveMode)) {
             return '#9CA3AF'; // Gray color for muted state
         }
         
@@ -119,8 +121,8 @@ const StatusCard: React.FC<StatusCardProps> = ({
     };
 
     const getBadgeStyle = () => {
-        // Return muted badge if switch is off
-        if (onSwitchToggle && !switchValue) {
+        // Return muted badge if switch is off or resolve mode is off
+        if (onSwitchToggle && (!switchValue || !resolveMode)) {
             return styles.mutedBadge;
         }
         
@@ -137,15 +139,15 @@ const StatusCard: React.FC<StatusCardProps> = ({
                         <Icon size={18} color={getIconColor()} />
                     </View>
                     <View style={styles.textContainer}>
-                        <Text style={[styles.title, onSwitchToggle && !switchValue && styles.mutedText]}>{title}</Text>
-                        <Text style={[styles.value, onSwitchToggle && !switchValue && styles.mutedText]}>{value}</Text>
+                        <Text style={[styles.title, onSwitchToggle && (!switchValue || !resolveMode) && styles.mutedText]}>{title}</Text>
+                        <Text style={[styles.value, onSwitchToggle && (!switchValue || !resolveMode) && styles.mutedText]}>{value}</Text>
                         {statusText && (
                             <Text style={[styles.statusBadge, getBadgeStyle()]}>
                                 {statusText}
                             </Text>
                         )}
-                        {differenceText && (
-                            <Text style={[styles.differenceText, onSwitchToggle && !switchValue && styles.mutedText]}>
+                        {differenceText && switchValue && resolveMode && (
+                            <Text style={[styles.differenceText, onSwitchToggle && (!switchValue || !resolveMode) && styles.mutedText]}>
                                 {differenceText}
                             </Text>
                         )}
@@ -153,7 +155,7 @@ const StatusCard: React.FC<StatusCardProps> = ({
                 </View>
                 {onSwitchToggle && (
                     <View style={styles.rightSection}>
-                        {arrowDirection && (
+                        {arrowDirection && switchValue && resolveMode && (
                             <View style={styles.chevronContainer}>
                                 {arrowDirection === 'up' ? (
                                     // For increase: show upward movement
@@ -185,10 +187,11 @@ const StatusCard: React.FC<StatusCardProps> = ({
                             </View>
                         )}
                         <Switch
-                            value={switchValue}
-                            onValueChange={onSwitchToggle}
+                            value={switchValue && resolveMode}
+                            onValueChange={resolveMode ? onSwitchToggle : undefined}
                             trackColor={{ false: '#E5E5E5', true: getIconColor() }}
-                            thumbColor={switchValue ? '#FFFFFF' : '#FFFFFF'}
+                            thumbColor={switchValue && resolveMode ? '#FFFFFF' : '#FFFFFF'}
+                            disabled={!resolveMode}
                         />
                     </View>
                 )}
