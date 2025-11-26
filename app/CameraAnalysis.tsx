@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {
     AlertTriangle,
@@ -27,12 +28,26 @@ interface SensorData {
     soilMoisture: number;
 }
 
+interface Plant {
+    id: number;
+    name: string;
+    image: string;
+    days: number;
+    temperature?: number[];
+    light?: number[];
+    soilMoisture?: number[];
+    humidity?: number[];
+    sunLight?: number[];
+}
+
 const CameraAnalysisScreen: React.FC = () => {
     const navigation = useNavigation();
     const [analyzing, setAnalyzing] = useState(false);
     const [analysisComplete, setAnalysisComplete] = useState(false);
     const [plantCondition, setPlantCondition] = useState<string | null>(null);
     const [sensorData, setSensorData] = useState<SensorData | null>(null);
+    const [plants, setPlants] = useState<Plant[]>([]);
+    const [selectedPlantIndex, setSelectedPlantIndex] = useState<number | null>(1);
     const [resolveMode, setResolveMode] = useState(false);
     const [temperatureController, setTemperatureController] = useState(true);
     const [humidityController, setHumidityController] = useState(true);
@@ -59,14 +74,38 @@ const CameraAnalysisScreen: React.FC = () => {
         }
     };
 
-    // Function to determine status based on optimal ranges
+    // Function to determine status based on optimal ranges from selected plant
     const getStatus = (value: number, type: string): { text: string; isWarning: boolean; isDanger: boolean } => {
-        const optimalRanges = {
-            temperature: { min: 20, max: 30 },
-            humidity: { min: 40, max: 70 },
-            sunLight: { min: 1000, max: 3000 },
-            soilMoisture: { min: 30, max: 70 }
+        // Get optimal ranges from selected plant or default fallback
+        let optimalRanges = {
+            temperature: { min: 20, max: 30 }, // Fallback
+            humidity: { min: 40, max: 70 },    // Fallback
+            sunLight: { min: 1000, max: 3000 }, // Fallback
+            soilMoisture: { min: 30, max: 70 }  // Fallback
         };
+
+        // If plants are available and a plant is selected, use its optimal ranges
+        if (plants && plants.length > 0 && selectedPlantIndex !== null && plants[selectedPlantIndex]) {
+            const selectedPlant = plants[selectedPlantIndex] as any;
+
+            optimalRanges = {
+                temperature: selectedPlant.temperature && selectedPlant.temperature.length >= 2
+                    ? { min: selectedPlant.temperature[0], max: selectedPlant.temperature[1] }
+                    : optimalRanges.temperature,
+
+                humidity: selectedPlant.humidity && selectedPlant.humidity.length >= 2
+                    ? { min: selectedPlant.humidity[0], max: selectedPlant.humidity[1] }
+                    : optimalRanges.humidity,
+
+                sunLight: selectedPlant.sunLight && selectedPlant.sunLight.length >= 2
+                    ? { min: selectedPlant.sunLight[0], max: selectedPlant.sunLight[1] }
+                    : optimalRanges.sunLight,
+
+                soilMoisture: selectedPlant.soilMoisture && selectedPlant.soilMoisture.length >= 2
+                    ? { min: selectedPlant.soilMoisture[0], max: selectedPlant.soilMoisture[1] }
+                    : optimalRanges.soilMoisture
+            };
+        }
 
         const range = optimalRanges[type as keyof typeof optimalRanges];
         if (!range) return { text: "Normal", isWarning: false, isDanger: false };
@@ -82,12 +121,36 @@ const CameraAnalysisScreen: React.FC = () => {
 
     // Function to calculate difference from optimal values
     const getDifferenceFromOptimal = (value: number, type: string): string | null => {
-        const optimalRanges = {
+        // Get optimal ranges from selected plant or default fallback
+        let optimalRanges = {
             temperature: { min: 20, max: 30 },
             humidity: { min: 40, max: 70 },
             sunLight: { min: 1000, max: 3000 },
             soilMoisture: { min: 30, max: 70 }
         };
+
+        // If plants are available and a plant is selected, use its optimal ranges
+        if (plants && plants.length > 0 && selectedPlantIndex !== null && plants[selectedPlantIndex]) {
+            const selectedPlant = plants[selectedPlantIndex] as any;
+
+            optimalRanges = {
+                temperature: selectedPlant.temperature && selectedPlant.temperature.length >= 2
+                    ? { min: selectedPlant.temperature[0], max: selectedPlant.temperature[1] }
+                    : optimalRanges.temperature,
+
+                humidity: selectedPlant.humidity && selectedPlant.humidity.length >= 2
+                    ? { min: selectedPlant.humidity[0], max: selectedPlant.humidity[1] }
+                    : optimalRanges.humidity,
+
+                sunLight: selectedPlant.sunLight && selectedPlant.sunLight.length >= 2
+                    ? { min: selectedPlant.sunLight[0], max: selectedPlant.sunLight[1] }
+                    : optimalRanges.sunLight,
+
+                soilMoisture: selectedPlant.soilMoisture && selectedPlant.soilMoisture.length >= 2
+                    ? { min: selectedPlant.soilMoisture[0], max: selectedPlant.soilMoisture[1] }
+                    : optimalRanges.soilMoisture
+            };
+        }
 
         const units = {
             temperature: '°C',
@@ -99,7 +162,7 @@ const CameraAnalysisScreen: React.FC = () => {
         const range = optimalRanges[type as keyof typeof optimalRanges];
         const unit = units[type as keyof typeof units];
         if (!range || !unit) return null;
-        
+
         if (value < range.min) {
             const difference = range.min - value;
             return `Increasing by ${difference.toFixed(1)}${unit}`;
@@ -114,16 +177,40 @@ const CameraAnalysisScreen: React.FC = () => {
 
     // Function to get arrow direction for animation
     const getArrowDirection = (value: number, type: string): 'up' | 'down' | null => {
-        const optimalRanges = {
+        // Get optimal ranges from selected plant or default fallback
+        let optimalRanges = {
             temperature: { min: 20, max: 30 },
             humidity: { min: 40, max: 70 },
             sunLight: { min: 1000, max: 3000 },
             soilMoisture: { min: 30, max: 70 }
         };
 
+        // If plants are available and a plant is selected, use its optimal ranges
+        if (plants && plants.length > 0 && selectedPlantIndex !== null && plants[selectedPlantIndex]) {
+            const selectedPlant = plants[selectedPlantIndex] as any;
+
+            optimalRanges = {
+                temperature: selectedPlant.temperature && selectedPlant.temperature.length >= 2
+                    ? { min: selectedPlant.temperature[0], max: selectedPlant.temperature[1] }
+                    : optimalRanges.temperature,
+
+                humidity: selectedPlant.humidity && selectedPlant.humidity.length >= 2
+                    ? { min: selectedPlant.humidity[0], max: selectedPlant.humidity[1] }
+                    : optimalRanges.humidity,
+
+                sunLight: selectedPlant.sunLight && selectedPlant.sunLight.length >= 2
+                    ? { min: selectedPlant.sunLight[0], max: selectedPlant.sunLight[1] }
+                    : optimalRanges.sunLight,
+
+                soilMoisture: selectedPlant.soilMoisture && selectedPlant.soilMoisture.length >= 2
+                    ? { min: selectedPlant.soilMoisture[0], max: selectedPlant.soilMoisture[1] }
+                    : optimalRanges.soilMoisture
+            };
+        }
+
         const range = optimalRanges[type as keyof typeof optimalRanges];
         if (!range) return null;
-        
+
         if (value < range.min) {
             return 'up'; // Need to increase
         } else if (value > range.max) {
@@ -132,6 +219,39 @@ const CameraAnalysisScreen: React.FC = () => {
             return null; // Within optimal range
         }
     };
+
+    useEffect(() => {
+        // Fetch plants data and load selected plant index from storage
+        const loadPlantsAndSelection = async () => {
+            try {
+                console.log("Fetching all plants from API...");
+                const response = await fetch(`${baseApiUrl}/userplants/all`);
+                const data = await response.json();
+
+                if (data?.data?.plants) {
+                    setPlants(data.data.plants);
+
+                    // Load selected plant index from storage
+                    try {
+                        const storedIndex = await AsyncStorage.getItem('selectedPlantIndex');
+                        if (storedIndex !== null) {
+                            const parsedIndex = JSON.parse(storedIndex);
+                            setSelectedPlantIndex(parsedIndex);
+                        } else {
+                            setSelectedPlantIndex(data.data.plants.length > 0 ? 1 : null);
+                        }
+                    } catch (storageError) {
+                        console.log("Error loading selected plant index:", storageError);
+                        setSelectedPlantIndex(data.data.plants.length > 0 ? 1 : null);
+                    }
+                }
+            } catch (error) {
+                console.log("Error fetching plants:", error);
+            }
+        };
+
+        loadPlantsAndSelection();
+    }, []);
 
     useEffect(() => {
         // Initial fetch
@@ -158,7 +278,7 @@ const CameraAnalysisScreen: React.FC = () => {
                     sunlight: sunlightValue
                 })
             });
-            
+
             const data = await response.json();
             console.log('Controller devices updated:', data);
         } catch (error) {
@@ -166,30 +286,54 @@ const CameraAnalysisScreen: React.FC = () => {
         }
     };
 
-    // Function to get difference value for API
-    const getDifferenceValue = (value: number, type: string): number => {
-        const optimalRanges = {
-            temperature: { min: 20, max: 30 },
-            humidity: { min: 40, max: 70 },
-            sunLight: { min: 1000, max: 3000 },
-            soilMoisture: { min: 30, max: 70 }
-        };
-
-        const range = optimalRanges[type as keyof typeof optimalRanges];
-        if (!range) return 0;
-        
-        if (value < range.min) {
-            return range.min - value; // Positive value for increase needed
-        } else if (value > range.max) {
-            return -(value - range.max); // Negative value for decrease needed
-        } else {
-            return 0; // Within optimal range
-        }
-    };
-
     // Effect to handle controller updates when resolve mode or switches change
     useEffect(() => {
         if (!sensorData) return;
+
+        // Function to get difference value for API (moved inside useEffect to avoid dependency issues)
+        const getDifferenceValue = (value: number, type: string): number => {
+            // Get optimal ranges from selected plant or default fallback
+            let optimalRanges = {
+                temperature: { min: 20, max: 30 },
+                humidity: { min: 40, max: 70 },
+                sunLight: { min: 1000, max: 3000 },
+                soilMoisture: { min: 30, max: 70 }
+            };
+
+            // If plants are available and a plant is selected, use its optimal ranges
+            if (plants && plants.length > 0 && selectedPlantIndex !== null && plants[selectedPlantIndex]) {
+                const selectedPlant = plants[selectedPlantIndex] as any;
+
+                optimalRanges = {
+                    temperature: selectedPlant.temperature && selectedPlant.temperature.length >= 2
+                        ? { min: selectedPlant.temperature[0], max: selectedPlant.temperature[1] }
+                        : optimalRanges.temperature,
+
+                    humidity: selectedPlant.humidity && selectedPlant.humidity.length >= 2
+                        ? { min: selectedPlant.humidity[0], max: selectedPlant.humidity[1] }
+                        : optimalRanges.humidity,
+
+                    sunLight: selectedPlant.sunLight && selectedPlant.sunLight.length >= 2
+                        ? { min: selectedPlant.sunLight[0], max: selectedPlant.sunLight[1] }
+                        : optimalRanges.sunLight,
+
+                    soilMoisture: selectedPlant.soilMoisture && selectedPlant.soilMoisture.length >= 2
+                        ? { min: selectedPlant.soilMoisture[0], max: selectedPlant.soilMoisture[1] }
+                        : optimalRanges.soilMoisture
+                };
+            }
+
+            const range = optimalRanges[type as keyof typeof optimalRanges];
+            if (!range) return 0;
+
+            if (value < range.min) {
+                return range.min - value; // Positive value for increase needed
+            } else if (value > range.max) {
+                return -(value - range.max); // Negative value for decrease needed
+            } else {
+                return 0; // Within optimal range
+            }
+        };
 
         if (resolveMode) {
             // Resolve mode ON: send calculated difference values for active controllers
@@ -197,13 +341,13 @@ const CameraAnalysisScreen: React.FC = () => {
             const humidityValue = humidityController ? getDifferenceValue(sensorData.humidity, 'humidity') : 0;
             const soilMoistureValue = soilMoistureController ? getDifferenceValue(sensorData.soilMoisture, 'soilMoisture') : 0;
             const sunlightValue = sunlightController ? getDifferenceValue(sensorData.sunLight, 'sunLight') : 0;
-            
+
             updateControllerDevices(tempValue, humidityValue, soilMoistureValue, sunlightValue);
         } else {
             // Resolve mode OFF: send all values as 0
             updateControllerDevices(0, 0, 0, 0);
         }
-    }, [resolveMode, temperatureController, humidityController, soilMoistureController, sunlightController, sensorData]);
+    }, [resolveMode, temperatureController, humidityController, soilMoistureController, sunlightController, sensorData, plants, selectedPlantIndex]);
 
     // Effect to turn off all controllers when resolve mode is disabled
     useEffect(() => {
@@ -275,7 +419,9 @@ const CameraAnalysisScreen: React.FC = () => {
             {/* Environment Condition Cards */}
             <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Your Controllors</Text>
+                    <View>
+                        <Text style={styles.sectionTitle}>Your Controllers</Text>
+                    </View>
                     <View style={styles.resolveModeContainer}>
                         <Text style={styles.resolveModeText}>Resolve Mode</Text>
                         <Switch
@@ -289,6 +435,9 @@ const CameraAnalysisScreen: React.FC = () => {
                         />
                     </View>
                 </View>
+                {plants && selectedPlantIndex !== null && plants[selectedPlantIndex] && (
+                    <Text style={styles.plantName}>{`${plants[selectedPlantIndex].name} Plant`}</Text>
+                )}
                 <View style={styles.statusCardsContainer}>
                     <StatusCard
                         title="Temperature"
@@ -340,7 +489,7 @@ const CameraAnalysisScreen: React.FC = () => {
                     />
                     <StatusCard
                         title="Sunlight"
-                        value={sensorData ? `${Math.round(sensorData.sunLight / 10)}k lux` : "-- lux"}
+                        value={sensorData ? `${sensorData.sunLight} lux` : "-- lux"}
                         icon={Sun}
                         warning={sensorData ? getStatus(sensorData.sunLight, 'sunLight').isWarning : false}
                         danger={sensorData ? getStatus(sensorData.sunLight, 'sunLight').isDanger : false}
@@ -384,7 +533,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 8,
+        marginBottom: 0,
     },
     resolveModeContainer: {
         flexDirection: 'row',
@@ -399,7 +548,15 @@ const styles = StyleSheet.create({
     sectionTitle: {
         fontWeight: '600',
         fontSize: 16,
-        marginBottom: 8,
+        marginBottom: 0,
+
+    },
+    plantName: {
+        fontSize: 14,
+        color: '#666',
+        fontWeight: '500',
+        marginBottom: 4,
+        marginLeft: 4,
     },
     statusCardsContainer: {
         flexDirection: 'column',

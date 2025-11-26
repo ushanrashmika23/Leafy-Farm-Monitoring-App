@@ -2,10 +2,23 @@ import { Wifi, WifiOff } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../const/Color';
+import { getUserData, UserData } from '../utils/Storage';
 import { baseApiUrl } from '../utils/Utils';
 
 export default function TopBar() {
     const [isConnected, setIsConnected] = useState(false);
+    const [userName, setUserName] = useState('User');
+
+    const loadUserName = async () => {
+        try {
+            const userData: UserData | null = await getUserData();
+            if (userData && userData.name) {
+                setUserName(userData.name);
+            }
+        } catch (error) {
+            console.log('Error loading user name:', error);
+        }
+    };
 
     const checkConnectionStatus = async () => {
         try {
@@ -36,6 +49,9 @@ export default function TopBar() {
     };
 
     useEffect(() => {
+        // Load user name from storage
+        loadUserName();
+        
         // Check connection status immediately
         checkConnectionStatus();
         
@@ -49,7 +65,7 @@ export default function TopBar() {
         <View style={styles.container}>
             <Image source={require('./../../assets/avatar.jpeg')} style={styles.avatar} />
             <View style={styles.center}>
-                <Text style={styles.greeting}>Hi Rashmika 👋</Text>
+                <Text style={styles.greeting}>Hi {userName} 👋</Text>
                 <Text style={styles.sub}>Welcome back to Leafy</Text>
             </View>
             <View style={styles.statusContainer}>

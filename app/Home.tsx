@@ -5,9 +5,10 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 // import FloatingActionButton from '../components/FloatingActionButton';
 import { useNavigation } from '@react-navigation/native';
 // import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { router } from 'expo-router';
-import { Camera, Droplet, Flower, Sun, Thermometer } from 'lucide-react-native';
+import { Droplet, Flower, ShieldCheckIcon, Sun, Thermometer } from 'lucide-react-native';
 import PlantCard from './components/PlantCard';
 import StatusCard from './components/StatusCard';
 import { COLORS } from './const/Color';
@@ -134,20 +135,37 @@ const HomeScreen: React.FC = () => {
     };
 
     useEffect(() => {
-        console.log("Fetching all plants from API...");
-        fetch(`${baseApiUrl}/userplants/all`)
-            .then(response => response.json())
-            .then(data => {
-                // console.log("Fetched plants:", data);
+        const loadPlantsAndSelection = async () => {
+            try {
+                console.log("Fetching all plants from API...");
+                const response = await fetch(`${baseApiUrl}/userplants/all`);
+                const data = await response.json();
+                
                 if (data?.data?.plants) {
                     setPlants(data.data.plants);
-                    setSelectedPlantIndex(data.data.plants.length > 0 ? 0 : null);
-                    setSelectedPlantIndex(1);
+                    
+                    // Load selected plant index from storage
+                    try {
+                        const storedIndex = await AsyncStorage.getItem('selectedPlantIndex');
+                        if (storedIndex !== null) {
+                            const parsedIndex = JSON.parse(storedIndex);
+                            setSelectedPlantIndex(parsedIndex);
+                        } else {
+                            // Default to index 1 if no stored selection
+                            setSelectedPlantIndex(1);
+                            await AsyncStorage.setItem('selectedPlantIndex', JSON.stringify(1));
+                        }
+                    } catch (storageError) {
+                        console.log("Error loading selected plant index:", storageError);
+                        setSelectedPlantIndex(1);
+                    }
                 }
-            })
-            .catch(error => {
+            } catch (error) {
                 console.log("Error fetching plants:", error);
-            });
+            }
+        };
+        
+        loadPlantsAndSelection();
     }, []);
 
     // Fetch sensor data every 1 second
@@ -225,7 +243,7 @@ const HomeScreen: React.FC = () => {
                         <View style={{ width: '48%' }}>
                             <StatusCard
                                 title="Sunlight"
-                                value={sensorData ? `${Math.round(sensorData.sunLight / 10)}k lux` : "-- lux"}
+                                value={sensorData ? `${sensorData.sunLight} lux` : "-- lux"}
                                 icon={Sun}
                                 warning={sensorData ? getStatus(sensorData.sunLight, 'sunLight').isWarning : false}
                                 danger={sensorData ? getStatus(sensorData.sunLight, 'sunLight').isDanger : false}
@@ -239,8 +257,8 @@ const HomeScreen: React.FC = () => {
                     style={styles.cameraAnalysisButton}
                     onPress={() => router.push('/CameraAnalysis' as any)}
                 >
-                    <Camera color="white" size={24} />
-                    <Text style={styles.cameraAnalysisButtonText}>Live Camera Analysis</Text>
+                    <ShieldCheckIcon color="white" size={24} />
+                    <Text style={styles.cameraAnalysisButtonText}>Resolve Environment</Text>
                 </TouchableOpacity>
 
                 <View style={styles.section}>
@@ -257,8 +275,14 @@ const HomeScreen: React.FC = () => {
                             plants.map((plant: any, idx: number) => (
                                 <TouchableOpacity
                                     key={plant._id}
-                                    onPress={() => {
+                                    onPress={async () => {
                                         setSelectedPlantIndex(idx);
+                                        // Save to AsyncStorage for cross-screen sync
+                                        try {
+                                            await AsyncStorage.setItem('selectedPlantIndex', JSON.stringify(idx));
+                                        } catch (error) {
+                                            console.log('Error saving selected plant index:', error);
+                                        }
                                         // Scroll to top of ScrollView
                                         scrollViewRef?.current?.scrollTo({ y: 0, animated: true });
                                     }}

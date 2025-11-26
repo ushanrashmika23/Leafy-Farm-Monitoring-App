@@ -1,3 +1,4 @@
+import { Droplet, Flower, Sun, Thermometer } from 'lucide-react-native';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../const/Color';
@@ -35,46 +36,54 @@ const PlantCard: React.FC<PlantCardProps> = ({
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: -8 }}>
                             {temperature && temperature.length > 0 && (
                                 <View style={[styles.detailColumn, { width: '50%', paddingRight: 8 }]}>
-                                    <View style={styles.detailHeader}>
-                                        <View style={styles.detailIconContainer}>
-                                            <Text style={styles.detailIcon}>🌡️</Text>
+                                    <View style={styles.detailRow}>
+                                        <View style={[styles.detailIconContainer, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
+                                            <Thermometer size={16} color="#3B82F6" />
                                         </View>
-                                        <Text style={styles.detailText}>Room Temp</Text>
+                                        <View style={styles.detailTextContainer}>
+                                            <Text style={styles.detailText}>Temperature</Text>
+                                            <Text style={styles.detailValue}>{temperature[0]}°C - {temperature[1]}°C</Text>
+                                        </View>
                                     </View>
-                                    <Text style={styles.detailValue}>{temperature[0]}°C - {temperature[1]}°C</Text>
                                 </View>
                             )}
                             {light && light.length > 0 && (
                                 <View style={[styles.detailColumn, { width: '50%', paddingLeft: 8 }]}>
-                                    <View style={styles.detailHeader}>
-                                        <View style={styles.detailIconContainer}>
-                                            <Text style={styles.detailIcon}>💡</Text>
+                                    <View style={styles.detailRow}>
+                                        <View style={[styles.detailIconContainer, { backgroundColor: 'rgba(249, 115, 22, 0.15)' }]}>
+                                            <Sun size={16} color="#F97316" />
                                         </View>
-                                        <Text style={styles.detailText}>Room Light</Text>
+                                        <View style={styles.detailTextContainer}>
+                                            <Text style={styles.detailText}>Sunlight</Text>
+                                            <Text style={styles.detailValue}>{light[0]/1000}k - {light[1]/1000}k</Text>
+                                        </View>
                                     </View>
-                                    <Text style={styles.detailValue}>{light[0]/1000}k - {light[1]/1000}k</Text>
                                 </View>
                             )}
                             {humidity && humidity.length > 0 && (
                                 <View style={[styles.detailColumn, { width: '50%', marginTop: 8, paddingRight: 8 }]}>
-                                    <View style={styles.detailHeader}>
-                                        <View style={styles.detailIconContainer}>
-                                            <Text style={styles.detailIcon}>💧</Text>
+                                    <View style={styles.detailRow}>
+                                        <View style={[styles.detailIconContainer, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
+                                            <Droplet size={16} color="#F59E0B" />
                                         </View>
-                                        <Text style={styles.detailText}>Humidity</Text>
+                                        <View style={styles.detailTextContainer}>
+                                            <Text style={styles.detailText}>Humidity</Text>
+                                            <Text style={styles.detailValue}>{humidity[0]}% - {humidity[1]}%</Text>
+                                        </View>
                                     </View>
-                                    <Text style={styles.detailValue}>{humidity[0]}% - {humidity[1]}%</Text>
                                 </View>
                             )}
                             {soilMoisture && soilMoisture.length > 0 && (
                                 <View style={[styles.detailColumn, { width: '50%', marginTop: 8, paddingLeft: 8 }]}>
-                                    <View style={styles.detailHeader}>
-                                        <View style={styles.detailIconContainer}>
-                                            <Text style={styles.detailIcon}>🪴</Text>
+                                    <View style={styles.detailRow}>
+                                        <View style={[styles.detailIconContainer, { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
+                                            <Flower size={16} color="#22C55E" />
                                         </View>
-                                        <Text style={styles.detailText}>Soil Moisture</Text>
+                                        <View style={styles.detailTextContainer}>
+                                            <Text style={styles.detailText}>Soil Moisture</Text>
+                                            <Text style={styles.detailValue}>{soilMoisture[0]}% - {soilMoisture[1]}%</Text>
+                                        </View>
                                     </View>
-                                    <Text style={styles.detailValue}>{soilMoisture[0]}% - {soilMoisture[1]}%</Text>
                                 </View>
                             )}
                         </View>
@@ -177,8 +186,7 @@ const styles = StyleSheet.create({
     },
     detailRow: {
         flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 8,
+        alignItems: 'flex-start',
     },
     detailColumn: {
         marginTop: 12,
@@ -188,29 +196,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 6,
     },
+    detailTextContainer: {
+        flex: 1,
+        marginLeft: 10,
+    },
     detailIconContainer: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: 'rgba(98, 195, 112, 0.15)',
+        width: 32,
+        height: 32,
+        borderRadius: 16,
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 10,
     },
-    detailIcon: {
-        fontSize: 14,
-        color: COLORS.primary,
-    },
+
     detailText: {
-        fontSize: 15,
+        fontSize: 13,
         fontWeight: '500',
         color: COLORS.text,
+        opacity: 0.75,
+        marginBottom: 2,
     },
     detailValue: {
-        fontSize: 14,
-        fontWeight: '800',
+        fontSize: 13,
+        fontWeight: '700',
         color: COLORS.black,
-        marginLeft: 38,
         letterSpacing: 0.3,
     },
 });

@@ -7,17 +7,23 @@ import {
     Leaf,
     Pencil,
     PlusCircle,
-    Router,
-    User,
+    User
 } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from './const/Color';
+import { getUserData, UserData } from './utils/Storage';
+import { baseApiUrl } from './utils/Utils';
 
 type Plant = {
-    id: number;
+    _id: string;
     name: string;
     image: string;
+    days: number;
+    temperature?: number[];
+    humidity?: number[];
+    soilMoisture?: number[];
+    sunLight?: number[];
 };
 
 type SettingItem = {
@@ -29,34 +35,44 @@ type SettingItem = {
 
 const SettingsScreen: React.FC = () => {
     const router = useRouter();
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const [plants, setPlants] = useState<Plant[]>([]);
 
-    const plants: Plant[] = [
-        {
-            id: 1,
-            name: 'Succulent',
-            image:
-                'https://images.unsplash.com/photo-1520412099551-62b6bafeb5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-        },
-        {
-            id: 2,
-            name: 'Pink Gerbera',
-            image:
-                'https://images.unsplash.com/photo-1596438459194-f275f413d6ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-        },
-        {
-            id: 3,
-            name: 'Semp',
-            image:
-                'https://images.unsplash.com/photo-1520412099551-62b6bafeb5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
-        },
-    ];
+    const loadUserData = async () => {
+        try {
+            const data = await getUserData();
+            setUserData(data);
+        } catch (error) {
+            console.log('Error loading user data:', error);
+        }
+    };
+
+    const loadPlants = async () => {
+        try {
+            console.log("Fetching all plants from API...");
+            const response = await fetch(`${baseApiUrl}/userplants/all`);
+            const data = await response.json();
+            
+            if (data?.data?.plants) {
+                setPlants(data.data.plants);
+            }
+        } catch (error) {
+            console.log("Error fetching plants:", error);
+        }
+    };
+
+    useEffect(() => {
+        loadUserData();
+        loadPlants();
+    }, []);
 
     const settingsItems: SettingItem[] = [
         { icon: PlusCircle, label: 'Add New Plant', color: '#62C370', screen: 'AddPlant' },
-        { icon: Router, label: 'Connect Lefy', color: '#EC4899', screen: 'ConnectLeafy' },
+        // { icon: Router, label: 'Connect Lefy', color: '#EC4899', screen: 'ConnectLeafy' },
         { icon: User, label: 'Edit User Data', color: '#4299E1', screen: 'EditUser' },
         { icon: Bell, label: 'Notifications', color: '#F59E0B', screen: 'NotificationType' },
-        { icon: HelpCircle, label: 'Help & Support', color: '#8B5CF6', screen: 'HelpSupport' },
+        // { icon: HelpCircle, label: 'Help & Support', color: '#8B5CF6', screen: 'HelpSupport' },
+        { icon: HelpCircle, label: 'Help & Support', color: '#EC4899', screen: 'HelpSupport' },
         { icon: Eraser, label: 'Erase All Data', color: '#EF4444', screen: 'EraseAllData' },
     ];
 
@@ -70,15 +86,13 @@ const SettingsScreen: React.FC = () => {
                     <View style={styles.accountCard}>
                         <View style={styles.avatarContainer}>
                             <Image
-                                source={{
-                                    uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
-                                }}
+                                source={require('./../assets/avatar.jpeg')}
                                 style={styles.avatar}
                             />
                         </View>
                         <View style={styles.accountInfo}>
-                            <Text style={styles.accountName}>Rashmika</Text>
-                            <Text style={styles.accountEmail}>rashmika@example.com</Text>
+                            <Text style={styles.accountName}>{userData?.name || 'User'}</Text>
+                            <Text style={styles.accountEmail}>{userData?.email || 'user@example.com'}</Text>
                         </View>
                         <ChevronRight size={20} color="gray" />
                     </View>
@@ -112,22 +126,23 @@ const SettingsScreen: React.FC = () => {
                 <View style={styles.plantsContainer}>
                     {plants.map((plant) => (
                         <TouchableOpacity
-                            key={plant.id}
+                            key={plant._id}
                             onPress={() => {
                                 router.push({
                                     pathname: '/EditPlant',
                                     params: {
-                                        id: plant.id.toString(),
+                                        id: plant._id,
                                         name: plant.name,
                                         image: plant.image,
-                                        tempMin: '20',
-                                        tempMax: '30',
-                                        humidityMin: '50',
-                                        humidityMax: '70',
-                                        lightMin: '60',
-                                        lightMax: '90',
-                                        moistureMin: '40',
-                                        moistureMax: '60',
+                                        days: plant.days?.toString() || '0',
+                                        tempMin: plant.temperature?.[0]?.toString() || '20',
+                                        tempMax: plant.temperature?.[1]?.toString() || '30',
+                                        humidityMin: plant.humidity?.[0]?.toString() || '50',
+                                        humidityMax: plant.humidity?.[1]?.toString() || '70',
+                                        lightMin: plant.sunLight?.[0]?.toString() || '1000',
+                                        lightMax: plant.sunLight?.[1]?.toString() || '3000',
+                                        moistureMin: plant.soilMoisture?.[0]?.toString() || '40',
+                                        moistureMax: plant.soilMoisture?.[1]?.toString() || '60',
                                     },
                                 } as any);
                             }}

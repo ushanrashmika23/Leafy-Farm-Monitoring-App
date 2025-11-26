@@ -6,27 +6,51 @@ import {
     Phone,
     User,
 } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from './const/Color';
+import { getUserData, storeUserData, UserData } from './utils/Storage';
 
 interface FormData {
     name: string;
     email: string;
-    phone: string;
+    telephone: string;
     address: string;
-    avatar: string;
 }
 
 const EditUserScreen: React.FC = () => {
     const navigation = useNavigation();
     const [formData, setFormData] = useState<FormData>({
-        name: 'Rashmika',
-        email: 'rashmika@example.com',
-        phone: '+1 234 567 890',
-        address: '123 Plant Street, Green City',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80',
+        name: '',
+        email: '',
+        telephone: '',
+        address: '',
     });
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const loadUserData = async () => {
+        try {
+            const userData = await getUserData();
+            if (userData) {
+                setFormData({
+                    name: userData.name || '',
+                    email: userData.email || '',
+                    telephone: userData.telephone || '',
+                    address: userData.address || '',
+                });
+            }
+        } catch (error) {
+            console.log('Error loading user data:', error);
+            Alert.alert('Error', 'Failed to load user data');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadUserData();
+    }, []);
 
     const handleChange = (key: keyof FormData, value: string) => {
         setFormData((prev) => ({
@@ -35,9 +59,34 @@ const EditUserScreen: React.FC = () => {
         }));
     };
 
-    const handleSubmit = () => {
-        console.log('User data:', formData);
-        navigation.navigate('Settings' as never); // adjust as per your route type
+    const handleSubmit = async () => {
+        setIsSaving(true);
+        try {
+            const userData: UserData = {
+                name: formData.name,
+                email: formData.email,
+                telephone: formData.telephone,
+                address: formData.address,
+                isFirstTime: false,
+            };
+            
+            await storeUserData(userData);
+            Alert.alert(
+                'Success',
+                'Your profile has been updated successfully!',
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => navigation.goBack(),
+                    },
+                ]
+            );
+        } catch (error) {
+            console.log('Error saving user data:', error);
+            Alert.alert('Error', 'Failed to save your changes. Please try again.');
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -51,11 +100,8 @@ const EditUserScreen: React.FC = () => {
 
             <View style={styles.profileSection}>
                 <View style={styles.avatarContainer}>
-                    <Image source={{ uri: formData.avatar }} style={styles.avatar} />
+                    <Image source={require('./../assets/avatar.jpeg')} style={styles.avatar} />
                 </View>
-                <TouchableOpacity>
-                    <Text style={styles.changePictureText}>Change Profile Picture</Text>
-                </TouchableOpacity>
             </View>
 
             <View style={styles.card}>
@@ -94,8 +140,8 @@ const EditUserScreen: React.FC = () => {
                             style={styles.input}
                             placeholder="Phone Number"
                             keyboardType="phone-pad"
-                            value={formData.phone}
-                            onChangeText={(text) => handleChange('phone', text)}
+                            value={formData.telephone}
+                            onChangeText={(text) => handleChange('telephone', text)}
                         />
                     </View>
                 </View>
@@ -114,8 +160,14 @@ const EditUserScreen: React.FC = () => {
                 </View>
             </View>
 
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Save Changes</Text>
+            <TouchableOpacity 
+                style={[styles.submitButton, (isLoading || isSaving) && styles.submitButtonDisabled]} 
+                onPress={handleSubmit}
+                disabled={isLoading || isSaving}
+            >
+                <Text style={styles.submitButtonText}>
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                </Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -205,6 +257,10 @@ const styles = StyleSheet.create({
         elevation: 5,
         alignItems: 'center',
         marginBottom: 24,
+    },
+    submitButtonDisabled: {
+        backgroundColor: COLORS.textSecondary,
+        shadowOpacity: 0.1,
     },
     submitButtonText: {
         color: 'white',
