@@ -250,7 +250,21 @@ const CameraAnalysisScreen: React.FC = () => {
             }
         };
 
+        // Load resolve mode from storage
+        const loadResolveMode = async () => {
+            try {
+                const storedResolveMode = await AsyncStorage.getItem('resolveMode');
+                if (storedResolveMode !== null) {
+                    const parsedResolveMode = JSON.parse(storedResolveMode);
+                    setResolveMode(parsedResolveMode);
+                }
+            } catch (error) {
+                console.log("Error loading resolve mode:", error);
+            }
+        };
+
         loadPlantsAndSelection();
+        loadResolveMode();
     }, []);
 
     useEffect(() => {
@@ -426,8 +440,14 @@ const CameraAnalysisScreen: React.FC = () => {
                         <Text style={styles.resolveModeText}>Resolve Mode</Text>
                         <Switch
                             value={resolveMode}
-                            onValueChange={(value) => {
+                            onValueChange={async (value) => {
                                 setResolveMode(value);
+                                // Save resolve mode to AsyncStorage
+                                try {
+                                    await AsyncStorage.setItem('resolveMode', JSON.stringify(value));
+                                } catch (error) {
+                                    console.log('Error saving resolve mode:', error);
+                                }
                                 // API update will be triggered by useEffect
                             }}
                             trackColor={{ false: '#E5E5E5', true: '#62C370' }}

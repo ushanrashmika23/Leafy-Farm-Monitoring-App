@@ -1,7 +1,4 @@
 import {
-    Check,
-    ChevronDown,
-    ChevronUp,
     Droplet,
     Flower,
     Sun,
@@ -326,7 +323,7 @@ const StatisticsScreen = () => {
             <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 24 }}>Statistics</Text>
 
             {/* Plant Dropdown */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 onPress={() => setDropdownOpen(!dropdownOpen)}
                 style={{ backgroundColor: 'white', padding: 16, borderRadius: 12, marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: COLORS.border }}
             >
@@ -355,7 +352,7 @@ const StatisticsScreen = () => {
                         </TouchableOpacity>
                     ))}
                 </View>
-            )}
+            )} */}
 
             {/* Time Periods */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 18 }}>
