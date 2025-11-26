@@ -40,7 +40,7 @@ const RecoveredDevicesScreen: React.FC = () => {
 
     const handleRescan = () => {
         // Logic to rescan devices
-        console.log('Rescanning...');
+        // console.log('Rescanning...');
     };
 
     return (

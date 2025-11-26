@@ -50,11 +50,11 @@ const StatisticsScreen = () => {
     // Process raw data based on time period - FRESH IMPLEMENTATION
     const processDataByTimePeriod = (records: DataRecord[], period: string): ProcessedData[] => {
         if (!records || records.length === 0) {
-            console.log("No records to process");
+            // console.log("No records to process");
             return [];
         }
 
-        console.log(`Processing ${records.length} records for ${period} view`);
+        // console.log(`Processing ${records.length} records for ${period} view`);
 
         // Helper function to parse mm/dd/yyyy date strings
         const parseDate = (dateString: string): Date => {
@@ -81,7 +81,7 @@ const StatisticsScreen = () => {
 
         sortedRecords.forEach((record, index) => {
             const recordDate = parseDate(record.Date);
-            console.log(`Processing record ${index + 1}: Date=${record.Date}, Parsed=${recordDate.toDateString()}`);
+            // console.log(`Processing record ${index + 1}: Date=${record.Date}, Parsed=${recordDate.toDateString()}`);
 
             let groupKey = '';
 
@@ -127,7 +127,7 @@ const StatisticsScreen = () => {
                     });
             }
 
-            console.log(`Group key for record: ${groupKey}`);
+            // console.log(`Group key for record: ${groupKey}`);
 
             if (!groupedData[groupKey]) {
                 groupedData[groupKey] = [];
@@ -135,16 +135,16 @@ const StatisticsScreen = () => {
             groupedData[groupKey].push(record);
         });
 
-        console.log("Grouped data:", Object.keys(groupedData).map(key => ({
-            key,
-            count: groupedData[key].length
-        })));
+        // console.log("Grouped data:", Object.keys(groupedData).map(key => ({
+        //     key,
+        //     count: groupedData[key].length
+        // })));
 
         // Convert grouped data to processed format
         const result: ProcessedData[] = [];
 
         Object.entries(groupedData).forEach(([label, recordsInGroup]) => {
-            console.log(`Processing group: ${label} with ${recordsInGroup.length} records`);
+            // console.log(`Processing group: ${label} with ${recordsInGroup.length} records`);
 
             // Calculate averages
             const totalTemp = recordsInGroup.reduce((sum, r) => sum + (r.temperature || 0), 0);
@@ -161,11 +161,11 @@ const StatisticsScreen = () => {
                 label,
                 temperature: Math.round(isNaN(avgTemp) ? 0 : avgTemp),
                 humidity: Math.round(isNaN(avgHumidity) ? 0 : avgHumidity),
-                sunlight: Math.round(isNaN(avgSunlight) ? 0 : Math.min(avgSunlight / 10, 100)), // Scale down sunlight
+                sunlight: Math.round(isNaN(avgSunlight) ? 0 : avgSunlight), // Keep original sunlight values
                 moisture: Math.round(isNaN(avgMoisture) ? 0 : avgMoisture),
             };
 
-            console.log(`Processed point:`, processedPoint);
+            // console.log(`Processed point:`, processedPoint);
             result.push(processedPoint);
         });
 
@@ -181,41 +181,41 @@ const StatisticsScreen = () => {
         // Limit to the last 15 data points for better chart readability
         const limitedResult = sortedResult.slice(-15);
 
-        console.log(`Final result: ${limitedResult.length} data points (limited from ${sortedResult.length})`);
+        // console.log(`Final result: ${limitedResult.length} data points (limited from ${sortedResult.length})`);
         return limitedResult;
     };
 
     // Fetch data from API - FRESH IMPLEMENTATION
     const fetchChartData = useCallback(async () => {
         setLoading(true);
-        console.log(`=== Fetching chart data for ${timePeriod} period ===`);
+        // console.log(`=== Fetching chart data for ${timePeriod} period ===`);
 
         try {
             const response = await fetch(`${baseApiUrl}/datarecods/all`);
             const apiData = await response.json();
 
-            console.log("API Response:", apiData);
+            // console.log("API Response:", apiData);
 
             if (apiData.code === 200 && apiData.data?.recods) {
                 const rawRecords = apiData.data.recods;
-                console.log(`Found ${rawRecords.length} raw records`);
+                // console.log(`Found ${rawRecords.length} raw records`);
 
                 // Log first few records for debugging
-                rawRecords.slice(0, 3).forEach((record: DataRecord, index: number) => {
-                    console.log(`Sample record ${index + 1}:`, {
-                        date: record.Date,
-                        temp: record.temperature,
-                        humidity: record.humidity,
-                        sunLight: record.sunLight,
-                        moisture: record.soilMoisture
-                    });
-                });
+                // rawRecords.slice(0, 3).forEach((record: DataRecord, index: number) => {
+                //     console.log(`Sample record ${index + 1}:`, {
+                //         date: record.Date,
+                //         temp: record.temperature,
+                //         humidity: record.humidity,
+                //         sunLight: record.sunLight,
+                //         moisture: record.soilMoisture
+                //     });
+                // });
 
                 const processedData = processDataByTimePeriod(rawRecords, timePeriod);
-                console.log(`Setting ${processedData.length} processed data points to chart`);
+                // console.log(`Setting ${processedData.length} processed data points to chart`);
                 setChartData(processedData);
             } else {
-                console.log("API response invalid or no records found");
+                // console.log("API response invalid or no records found");
                 setChartData([]);
             }
         } catch (error) {
@@ -228,7 +228,7 @@ const StatisticsScreen = () => {
                 { label: 'Sep 11', temperature: 24, humidity: 70, moisture: 38, sunlight: 75 },
                 { label: 'Sep 12', temperature: 26, humidity: 60, moisture: 35, sunlight: 95 },
             ];
-            console.log("Using dummy data:", dummyData);
+            // console.log("Using dummy data:", dummyData);
             setChartData(dummyData);
         }
         setLoading(false);

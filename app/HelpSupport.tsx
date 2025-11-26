@@ -8,7 +8,7 @@ const HelpAndSupportScreen: React.FC = () => {
     const navigation = useNavigation();
 
     const handleSelect = (item: string) => {
-        console.log('Selected:', item);
+        // console.log('Selected:', item);
         // You can navigate or show info here
     };
 

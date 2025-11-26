@@ -13,7 +13,7 @@ const EraseAllDataScreen: React.FC = () => {
             'Are you sure you want to erase all data? This action cannot be undone.',
             [
                 { text: 'Cancel', style: 'cancel' },
-                { text: 'Erase', style: 'destructive', onPress: () => console.log('Data erased') },
+                { text: 'Erase', style: 'destructive', onPress: () => {/* console.log('Data erased') */} },
             ]
         );
     };

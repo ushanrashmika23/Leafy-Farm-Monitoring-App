@@ -43,7 +43,7 @@ const HomeScreen: React.FC = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const scrollViewRef = React.useRef<ScrollView>(null);
     const handleAddPlant = (): void => {
-        console.log('Add new plant');
+        // console.log('Add new plant');
     };
 
     // Function to fetch latest sensor data
@@ -62,7 +62,7 @@ const HomeScreen: React.FC = () => {
                 });
             }
         } catch (error) {
-            console.log("Error fetching sensor data:", error);
+            // console.log("Error fetching sensor data:", error);
         }
     };
 
@@ -137,7 +137,7 @@ const HomeScreen: React.FC = () => {
     useEffect(() => {
         const loadPlantsAndSelection = async () => {
             try {
-                console.log("Fetching all plants from API...");
+                // console.log("Fetching all plants from API...");
                 const response = await fetch(`${baseApiUrl}/userplants/all`);
                 const data = await response.json();
                 
@@ -156,12 +156,12 @@ const HomeScreen: React.FC = () => {
                             await AsyncStorage.setItem('selectedPlantIndex', JSON.stringify(1));
                         }
                     } catch (storageError) {
-                        console.log("Error loading selected plant index:", storageError);
+                        // console.log("Error loading selected plant index:", storageError);
                         setSelectedPlantIndex(1);
                     }
                 }
             } catch (error) {
-                console.log("Error fetching plants:", error);
+                // console.log("Error fetching plants:", error);
             }
         };
         
@@ -281,7 +281,7 @@ const HomeScreen: React.FC = () => {
                                         try {
                                             await AsyncStorage.setItem('selectedPlantIndex', JSON.stringify(idx));
                                         } catch (error) {
-                                            console.log('Error saving selected plant index:', error);
+                                            // console.log('Error saving selected plant index:', error);
                                         }
                                         // Scroll to top of ScrollView
                                         scrollViewRef?.current?.scrollTo({ y: 0, animated: true });

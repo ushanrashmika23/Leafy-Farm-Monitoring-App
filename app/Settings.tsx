@@ -43,13 +43,13 @@ const SettingsScreen: React.FC = () => {
             const data = await getUserData();
             setUserData(data);
         } catch (error) {
-            console.log('Error loading user data:', error);
+            // console.log('Error loading user data:', error);
         }
     };
 
     const loadPlants = async () => {
         try {
-            console.log("Fetching all plants from API...");
+            // console.log("Fetching all plants from API...");
             const response = await fetch(`${baseApiUrl}/userplants/all`);
             const data = await response.json();
             
@@ -57,7 +57,7 @@ const SettingsScreen: React.FC = () => {
                 setPlants(data.data.plants);
             }
         } catch (error) {
-            console.log("Error fetching plants:", error);
+            // console.log("Error fetching plants:", error);
         }
     };
 

@@ -16,7 +16,7 @@ export default function TopBar() {
                 setUserName(userData.name);
             }
         } catch (error) {
-            console.log('Error loading user name:', error);
+            // console.log('Error loading user name:', error);
         }
     };
 
@@ -43,7 +43,7 @@ export default function TopBar() {
                 throw error;
             }
         } catch (error) {
-            console.log('Connection check failed:', error);
+            // console.log('Connection check failed:', error);
             setIsConnected(false);
         }
     };

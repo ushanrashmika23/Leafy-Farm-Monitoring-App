@@ -51,7 +51,7 @@ const AddPlantScreen: React.FC = () => {
     };
 
     const handleSubmit = () => {
-        console.log('Plant data:', formData);
+        // console.log('Plant data:', formData);
         navigation.goBack();
     };
 

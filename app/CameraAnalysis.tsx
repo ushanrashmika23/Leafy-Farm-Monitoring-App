@@ -70,7 +70,7 @@ const CameraAnalysisScreen: React.FC = () => {
                 });
             }
         } catch (error) {
-            console.log("Error fetching sensor data:", error);
+            // console.log("Error fetching sensor data:", error);
         }
     };
 
@@ -224,7 +224,7 @@ const CameraAnalysisScreen: React.FC = () => {
         // Fetch plants data and load selected plant index from storage
         const loadPlantsAndSelection = async () => {
             try {
-                console.log("Fetching all plants from API...");
+                // console.log("Fetching all plants from API...");
                 const response = await fetch(`${baseApiUrl}/userplants/all`);
                 const data = await response.json();
 
@@ -241,12 +241,12 @@ const CameraAnalysisScreen: React.FC = () => {
                             setSelectedPlantIndex(data.data.plants.length > 0 ? 1 : null);
                         }
                     } catch (storageError) {
-                        console.log("Error loading selected plant index:", storageError);
+                        // console.log("Error loading selected plant index:", storageError);
                         setSelectedPlantIndex(data.data.plants.length > 0 ? 1 : null);
                     }
                 }
             } catch (error) {
-                console.log("Error fetching plants:", error);
+                // console.log("Error fetching plants:", error);
             }
         };
 
@@ -259,7 +259,7 @@ const CameraAnalysisScreen: React.FC = () => {
                     setResolveMode(parsedResolveMode);
                 }
             } catch (error) {
-                console.log("Error loading resolve mode:", error);
+                // console.log("Error loading resolve mode:", error);
             }
         };
 
@@ -294,9 +294,9 @@ const CameraAnalysisScreen: React.FC = () => {
             });
 
             const data = await response.json();
-            console.log('Controller devices updated:', data);
+            // console.log('Controller devices updated:', data);
         } catch (error) {
-            console.log('Error updating controller devices:', error);
+            // console.log('Error updating controller devices:', error);
         }
     };
 
@@ -446,7 +446,7 @@ const CameraAnalysisScreen: React.FC = () => {
                                 try {
                                     await AsyncStorage.setItem('resolveMode', JSON.stringify(value));
                                 } catch (error) {
-                                    console.log('Error saving resolve mode:', error);
+                                    // console.log('Error saving resolve mode:', error);
                                 }
                                 // API update will be triggered by useEffect
                             }}

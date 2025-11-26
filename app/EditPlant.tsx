@@ -39,7 +39,7 @@ const EditPlantScreen: React.FC = () => {
 
     useEffect(() => {
         if (id) {
-            console.log(`Fetching data for plant ID: ${id}`);
+            // console.log(`Fetching data for plant ID: ${id}`);
         }
     }, [id]);
 
@@ -62,12 +62,12 @@ const EditPlantScreen: React.FC = () => {
     };
 
     const handleSubmit = () => {
-        console.log('Updated plant data:', formData);
+        // console.log('Updated plant data:', formData);
         navigation.navigate('Settings' as never);
     };
 
     const handleDelete = () => {
-        console.log('Deleting plant');
+        // console.log('Deleting plant');
         navigation.navigate('Settings' as never);
     };
 
