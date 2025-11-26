@@ -10,6 +10,22 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { baseApiUrl } from './utils/Utils';
+
+type RouteParams = {
+    id: string;
+    name: string;
+    image: string;
+    days: string;
+    tempMin: string;
+    tempMax: string;
+    humidityMin: string;
+    humidityMax: string;
+    lightMin: string;
+    lightMax: string;
+    moistureMin: string;
+    moistureMax: string;
+};
 
 interface FormData {
     name: string;
@@ -23,13 +39,12 @@ interface FormData {
 
 const EditPlantScreen: React.FC = () => {
     const navigation = useNavigation();
-    const route = useRoute<RouteProp<Record<string, { id: string }>, string>>();
-    const { id } = route.params || {};
+    const route = useRoute<RouteProp<Record<string, RouteParams>, string>>();
+    const params = route.params || {};
 
     const [formData, setFormData] = useState<FormData>({
-        name: 'Succulent',
-        image:
-            'https://images.unsplash.com/photo-1520412099551-62b6bafeb5bb?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80',
+        name: '',
+        image: '',
         idealTemperature: { min: '18', max: '26' },
         idealHumidity: { min: '40', max: '60' },
         idealLight: { min: '60', max: '80' },
@@ -38,10 +53,31 @@ const EditPlantScreen: React.FC = () => {
     });
 
     useEffect(() => {
-        if (id) {
-            // console.log(`Fetching data for plant ID: ${id}`);
+        // Load plant data from route parameters
+        if (params.id) {
+            setFormData({
+                name: params.name || '',
+                image: params.image || '',
+                idealTemperature: {
+                    min: params.tempMin || '18',
+                    max: params.tempMax || '26'
+                },
+                idealHumidity: {
+                    min: params.humidityMin || '40',
+                    max: params.humidityMax || '60'
+                },
+                idealLight: {
+                    min: params.lightMin || '60',
+                    max: params.lightMax || '80'
+                },
+                idealMoisture: {
+                    min: params.moistureMin || '40',
+                    max: params.moistureMax || '60'
+                },
+                plantedDate: '2023-05-15', // You can add this to params if needed
+            });
         }
-    }, [id]);
+    }, [params]);
 
     const handleChange = (name: string, value: string) => {
         if (name.includes('.')) {
@@ -61,14 +97,65 @@ const EditPlantScreen: React.FC = () => {
         }
     };
 
-    const handleSubmit = () => {
-        // console.log('Updated plant data:', formData);
-        navigation.navigate('Settings' as never);
+    const handleSubmit = async () => {
+        try {
+            if (!params.id) {
+                // console.log('No plant ID provided');
+                return;
+            }
+
+            const updateData = {
+                name: formData.name,
+                image: formData.image,
+                temperature: [parseFloat(formData.idealTemperature.min), parseFloat(formData.idealTemperature.max)],
+                humidity: [parseFloat(formData.idealHumidity.min), parseFloat(formData.idealHumidity.max)],
+                sunLight: [parseFloat(formData.idealLight.min), parseFloat(formData.idealLight.max)],
+                soilMoisture: [parseFloat(formData.idealMoisture.min), parseFloat(formData.idealMoisture.max)],
+            };
+
+            const response = await fetch(`${baseApiUrl}/userplants/update/${params.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updateData)
+            });
+
+            const result = await response.json();
+            if (result.code === 200) {
+                // Success - navigate back
+                navigation.navigate('Settings' as never);
+            } else {
+                // Handle error
+                // console.log('Error updating plant:', result.message);
+            }
+        } catch (error) {
+            // console.log('Error updating plant:', error);
+        }
     };
 
-    const handleDelete = () => {
-        // console.log('Deleting plant');
-        navigation.navigate('Settings' as never);
+    const handleDelete = async () => {
+        try {
+            if (!params.id) {
+                // console.log('No plant ID provided');
+                return;
+            }
+
+            const response = await fetch(`${baseApiUrl}/userplants/delete/${params.id}`, {
+                method: 'DELETE',
+            });
+
+            const result = await response.json();
+            if (result.code === 200) {
+                // Success - navigate back
+                navigation.navigate('Settings' as never);
+            } else {
+                // Handle error
+                // console.log('Error deleting plant:', result.message);
+            }
+        } catch (error) {
+            // console.log('Error deleting plant:', error);
+        }
     };
 
     return (
@@ -77,7 +164,7 @@ const EditPlantScreen: React.FC = () => {
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <ArrowLeft size={24} color="black" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Edit Plant</Text>
+                <Text style={styles.headerTitle}>Plant Profile</Text>
             </View>
 
             <View style={styles.card}>
@@ -156,14 +243,14 @@ const EditPlantScreen: React.FC = () => {
                 })}
             </View>
 
-            <View style={styles.buttonContainer}>
+            {/* <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
                     <Text style={styles.buttonText}>Delete Plant</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Save Changes</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
         </ScrollView>
     );
 };

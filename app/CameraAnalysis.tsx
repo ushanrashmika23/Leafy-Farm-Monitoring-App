@@ -455,9 +455,9 @@ const CameraAnalysisScreen: React.FC = () => {
                         />
                     </View>
                 </View>
-                {plants && selectedPlantIndex !== null && plants[selectedPlantIndex] && (
+                {/* {plants && selectedPlantIndex !== null && plants[selectedPlantIndex] && (
                     <Text style={styles.plantName}>{`${plants[selectedPlantIndex].name} Plant`}</Text>
-                )}
+                )} */}
                 <View style={styles.statusCardsContainer}>
                     <StatusCard
                         title="Temperature"
@@ -525,7 +525,7 @@ const CameraAnalysisScreen: React.FC = () => {
                     />
                 </View>
             </View>
-
+            <View style={{ height: 180 }}></View>
         </ScrollView>
     );
 };
